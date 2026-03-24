@@ -150,11 +150,14 @@
         .flip-separator {
             display: flex;
             align-items: center;
+            justify-content: center;
             font-size: 32px;
             font-weight: 800;
             color: var(--amber);
             text-shadow: 0 0 20px var(--amber-glow);
             animation: blink 2s infinite;
+            height: 50px;
+            line-height: 50px;
         }
         
         @keyframes blink {
@@ -446,94 +449,98 @@
             50% { opacity: 0.7; }
         }
         
-        /* Metro Line */
+        /* Metro Line - Vertical Layout */
         .metro-container {
             position: relative;
-            padding: 40px 20px 60px 20px;
+            padding: 10px 10px 10px 20px;
         }
         
         .metro-line {
             position: relative;
-            height: 12px;
-            background: linear-gradient(90deg, var(--amber) 0%, var(--green-crt) 100%);
-            border-radius: 6px;
+            width: 6px;
+            margin-left: 20px;
+            background: linear-gradient(180deg, var(--amber) 0%, var(--green-crt) 100%);
+            border-radius: 3px;
             box-shadow: 
-                0 0 30px var(--amber-glow),
-                0 0 60px var(--amber-glow),
-                inset 0 2px 10px rgba(0, 0, 0, 0.5);
+                0 0 20px var(--amber-glow),
+                0 0 40px var(--amber-glow);
             animation: line-glow 3s ease-in-out infinite;
         }
         
         @keyframes line-glow {
             0%, 100% {
                 box-shadow: 
-                    0 0 30px var(--amber-glow),
-                    0 0 60px var(--amber-glow);
+                    0 0 20px var(--amber-glow),
+                    0 0 40px var(--amber-glow);
             }
             50% {
                 box-shadow: 
-                    0 0 50px var(--amber-glow),
-                    0 0 100px var(--amber-glow);
+                    0 0 30px var(--amber-glow),
+                    0 0 60px var(--amber-glow);
             }
         }
         
         .metro-stop {
+            position: relative;
+            display: flex;
+            align-items: center;
+            padding: 14px 0;
+            cursor: pointer;
+            z-index: 10;
+        }
+        
+        .metro-stop-dot {
             position: absolute;
-            width: 24px;
-            height: 24px;
+            left: -3px;
+            width: 20px;
+            height: 20px;
             background: #000;
             border: 4px solid var(--amber);
             border-radius: 50%;
-            transform: translate(-50%, -50%);
-            top: 50%;
-            cursor: pointer;
+            box-shadow: 0 0 15px var(--amber-glow);
             transition: all 0.3s cubic-bezier(0.4, 0.0, 0.2, 1);
-            z-index: 10;
-            box-shadow: 0 0 20px var(--amber-glow);
+            z-index: 11;
+            flex-shrink: 0;
         }
-        
-        .metro-stop:hover {
-            transform: translate(-50%, -50%) scale(1.4);
-            box-shadow: 0 0 40px var(--amber-glow);
+
+        .metro-stop:hover .metro-stop-dot {
+            transform: scale(1.3);
+            box-shadow: 0 0 30px var(--amber-glow);
             border-color: var(--green-crt);
         }
         
-        .metro-stop.active {
+        .metro-stop.active .metro-stop-dot {
             background: var(--amber);
             animation: stop-pulse 1.5s infinite;
-            box-shadow: 0 0 40px var(--amber-glow);
+            box-shadow: 0 0 30px var(--amber-glow);
         }
         
         @keyframes stop-pulse {
             0%, 100% {
-                transform: translate(-50%, -50%) scale(1);
-                box-shadow: 0 0 40px var(--amber-glow);
+                transform: scale(1);
+                box-shadow: 0 0 30px var(--amber-glow);
             }
             50% {
-                transform: translate(-50%, -50%) scale(1.5);
-                box-shadow: 0 0 60px var(--amber-glow);
+                transform: scale(1.4);
+                box-shadow: 0 0 50px var(--amber-glow);
             }
         }
         
         .metro-stop-label {
-            position: absolute;
-            top: 30px;
-            left: 50%;
-            transform: translateX(-50%);
-            font-size: 9px;
+            margin-left: 28px;
+            font-size: 13px;
             font-weight: 600;
-            white-space: nowrap;
-            color: #666;
+            color: #999;
             text-transform: uppercase;
-            letter-spacing: 0;
-            max-width: 55px;
-            overflow: hidden;
-            text-overflow: ellipsis;
+            letter-spacing: 0.5px;
+            white-space: nowrap;
         }
-        
-        /* Stagger labels to avoid overlap */
-        .metro-stop:nth-child(even) .metro-stop-label {
-            top: -25px;
+
+        .metro-stop-distance {
+            margin-left: 8px;
+            font-size: 10px;
+            color: #555;
+            font-family: 'JetBrains Mono', monospace;
         }
         
         .metro-stop.active .metro-stop-label {
@@ -543,14 +550,13 @@
         
         .bus-marker {
             position: absolute;
-            width: 48px;
-            height: 48px;
-            border: 4px solid #fff;
+            left: -18px;
+            width: 40px;
+            height: 40px;
+            border: 3px solid #fff;
             border-radius: 50%;
-            transform: translate(-50%, -50%);
-            top: 50%;
-            box-shadow: 0 0 30px rgba(255, 255, 255, 0.8);
-            animation: bus-float 2s ease-in-out infinite;
+            box-shadow: 0 0 25px rgba(255, 255, 255, 0.8);
+            animation: bus-pulse 2s ease-in-out infinite;
             z-index: 20;
             display: flex;
             align-items: center;
@@ -559,12 +565,12 @@
             color: #000;
         }
         
-        @keyframes bus-float {
+        @keyframes bus-pulse {
             0%, 100% {
-                transform: translate(-50%, -50%) translateY(0);
+                box-shadow: 0 0 25px rgba(255, 255, 255, 0.8);
             }
             50% {
-                transform: translate(-50%, -50%) translateY(-10px);
+                box-shadow: 0 0 40px rgba(255, 255, 255, 1);
             }
         }
         
@@ -575,18 +581,18 @@
         
         .bus-time-badge {
             position: absolute;
-            top: -40px;
-            left: 50%;
-            transform: translateX(-50%);
+            left: 50px;
+            top: 50%;
+            transform: translateY(-50%);
             background: #000;
             border: 2px solid var(--amber);
             color: var(--amber);
-            padding: 4px 10px;
+            padding: 3px 8px;
             border-radius: 6px;
-            font-size: 12px;
+            font-size: 11px;
             font-weight: 800;
             white-space: nowrap;
-            box-shadow: 0 0 20px var(--amber-glow);
+            box-shadow: 0 0 15px var(--amber-glow);
             pointer-events: none;
             font-family: 'Orbitron', monospace;
         }
@@ -755,17 +761,19 @@
             
             .flip-separator {
                 font-size: 26px;
+                height: 40px;
+                line-height: 40px;
             }
             
             .flight-board-header {
-                grid-template-columns: 55px 1fr 55px 70px !important;
+                grid-template-columns: 50px 1fr 50px 1fr !important;
                 gap: 4px !important;
                 padding: 8px 6px !important;
                 font-size: 8px !important;
             }
             
             .flight-row {
-                grid-template-columns: 55px 1fr 55px 70px;
+                grid-template-columns: 50px 1fr 50px 1fr;
                 gap: 4px;
                 padding: 8px 6px;
             }
@@ -794,34 +802,37 @@
                 white-space: nowrap;
             }
             
-            .metro-stop {
-                width: 14px;
-                height: 14px;
+            .metro-stop-dot {
+                width: 16px;
+                height: 16px;
                 border-width: 3px;
+                left: -2px;
             }
             
             .metro-stop-label {
-                font-size: 7px;
-                letter-spacing: 0;
-                max-width: 42px;
-                overflow: hidden;
-                text-overflow: ellipsis;
+                font-size: 11px;
+                margin-left: 22px;
             }
             
             .metro-container {
-                padding: 50px 8px;
+                padding: 8px 8px 8px 16px;
+            }
+            
+            .metro-stop {
+                padding: 10px 0;
             }
             
             .bus-marker {
-                width: 30px;
-                height: 30px;
+                width: 28px;
+                height: 28px;
                 border-width: 2px;
+                left: -14px;
             }
             
             .bus-time-badge {
                 font-size: 9px;
-                padding: 2px 4px;
-                top: -28px;
+                padding: 2px 5px;
+                left: 38px;
             }
             
             .retro-panel {
@@ -867,14 +878,16 @@
             
             .flip-separator {
                 font-size: 22px;
+                height: 36px;
+                line-height: 36px;
             }
             
             .flight-board-header {
-                grid-template-columns: 50px 1fr 50px 60px !important;
+                grid-template-columns: 45px 1fr 45px 1fr !important;
             }
             
             .flight-row {
-                grid-template-columns: 50px 1fr 50px 60px;
+                grid-template-columns: 45px 1fr 45px 1fr;
             }
             
             .flight-time {
@@ -1092,9 +1105,9 @@
                 <div class="retro-panel p-3 sm:p-6">
                     
                     <!-- Направление 1 -->
-                    <div class="mb-12">
-                        <div class="text-sm uppercase tracking-widest opacity-60 mb-4 flex items-center gap-2">
-                            <span>▶</span>
+                    <div class="mb-8">
+                        <div class="text-sm uppercase tracking-widest opacity-60 mb-3 flex items-center gap-2">
+                            <span>▼</span>
                             <span>РЫБАЦКОЕ → ПАВЛОВО-2</span>
                         </div>
                         <div class="metro-container">
@@ -1103,16 +1116,16 @@
                     </div>
                     
                     <!-- Разделитель -->
-                    <div class="border-t border-amber-900 opacity-30 my-8"></div>
+                    <div class="border-t border-amber-900 opacity-30 my-6"></div>
                     
                     <!-- Направление 2 -->
                     <div>
-                        <div class="text-sm uppercase tracking-widest opacity-60 mb-4 flex items-center gap-2">
-                            <span>◀</span>
+                        <div class="text-sm uppercase tracking-widest opacity-60 mb-3 flex items-center gap-2">
+                            <span>▲</span>
                             <span>ПАВЛОВО-2 → РЫБАЦКОЕ</span>
                         </div>
                         <div class="metro-container">
-                            <div class="metro-line" id="metroLine2" style="background: linear-gradient(90deg, var(--green-crt) 0%, var(--amber) 100%);"></div>
+                            <div class="metro-line" id="metroLine2" style="background: linear-gradient(180deg, var(--green-crt) 0%, var(--amber) 100%);"></div>
                         </div>
                     </div>
                     
@@ -1647,20 +1660,26 @@
             const container = document.getElementById(containerId);
             container.innerHTML = '';
             
-            // Остановки
+            // Остановки — вертикальный список
             STOPS.forEach((stop, index) => {
-                const percentage = (stop.distanceKm / TOTAL_DISTANCE) * 100;
-                
                 const stopEl = document.createElement('div');
                 stopEl.className = 'metro-stop';
-                stopEl.style.left = percentage + '%';
                 stopEl.id = `${containerId}-stop-${index}`;
+                
+                const dotEl = document.createElement('div');
+                dotEl.className = 'metro-stop-dot';
                 
                 const labelEl = document.createElement('div');
                 labelEl.className = 'metro-stop-label';
                 labelEl.textContent = stop.name;
+
+                const distEl = document.createElement('span');
+                distEl.className = 'metro-stop-distance';
+                distEl.textContent = stop.distanceKm + ' км';
                 
+                stopEl.appendChild(dotEl);
                 stopEl.appendChild(labelEl);
+                stopEl.appendChild(distEl);
                 container.appendChild(stopEl);
             });
             
@@ -1700,15 +1719,45 @@
             // Удаляем старые
             container.querySelectorAll('.bus-marker').forEach(el => el.remove());
             
-            // Рисуем новые
+            // Рисуем новые — вертикальная ось
+            const stops = container.querySelectorAll('.metro-stop');
+            const containerRect = container.getBoundingClientRect();
+            const containerTop = container.offsetTop;
+            
             activeBuses.forEach((bus, index) => {
-                const percentage = (bus.distanceCovered / TOTAL_DISTANCE) * 100;
+                const percentage = bus.distanceCovered / TOTAL_DISTANCE;
+                
+                // Находим между какими остановками автобус
+                let fromIdx = 0;
+                for (let i = 0; i < STOPS.length - 1; i++) {
+                    if (bus.distanceCovered >= STOPS[i].distanceKm) {
+                        fromIdx = i;
+                    }
+                }
+                const toIdx = Math.min(fromIdx + 1, STOPS.length - 1);
+                
+                // Вычисляем Y позицию между остановками
+                const fromStop = stops[fromIdx];
+                const toStop = stops[toIdx];
+                if (!fromStop || !toStop) return;
+                
+                const fromY = fromStop.offsetTop + fromStop.offsetHeight / 2;
+                const toY = toStop.offsetTop + toStop.offsetHeight / 2;
+                
+                let segmentProgress = 0;
+                if (STOPS[toIdx].distanceKm !== STOPS[fromIdx].distanceKm) {
+                    segmentProgress = (bus.distanceCovered - STOPS[fromIdx].distanceKm) / 
+                                     (STOPS[toIdx].distanceKm - STOPS[fromIdx].distanceKm);
+                }
+                
+                const yPos = fromY + (toY - fromY) * segmentProgress;
                 
                 const busEl = document.createElement('div');
                 busEl.className = `bus-marker ${bus.color}`;
-                busEl.style.left = Math.min(percentage, 100) + '%';
+                busEl.style.position = 'absolute';
+                busEl.style.top = yPos + 'px';
                 busEl.innerHTML = `
-                    <svg viewBox="0 0 24 24" fill="currentColor" style="width: 70%; height: 70%;">
+                    <svg viewBox="0 0 24 24" fill="currentColor" style="width: 65%; height: 65%;">
                         <path d="M12 2C8 2 4 2.5 4 6V15.5C4 17.43 5.57 19 7.5 19L6 20.5V21H8L10 19H14L16 21H18V20.5L16.5 19C18.43 19 20 17.43 20 15.5V6C20 2.5 16 2 12 2M7.5 17C6.67 17 6 16.33 6 15.5S6.67 14 7.5 14 9 14.67 9 15.5 8.33 17 7.5 17M11 10H6V6H11V10M13 10V6H18V10H13M16.5 17C15.67 17 15 16.33 15 15.5S15.67 14 16.5 14 18 14.67 18 15.5 17.33 17 16.5 17Z"/>
                     </svg>
                 `;
@@ -1722,15 +1771,8 @@
                 
                 // Подсветка остановки
                 if (index === 0) {
-                    let nearestStopIndex = 0;
-                    for (let i = 0; i < STOPS.length; i++) {
-                        if (bus.distanceCovered >= STOPS[i].distanceKm) {
-                            nearestStopIndex = i;
-                        }
-                    }
-                    
                     container.querySelectorAll('.metro-stop').forEach(stop => stop.classList.remove('active'));
-                    const nearestStop = container.querySelector(`#${container.id}-stop-${nearestStopIndex}`);
+                    const nearestStop = container.querySelector(`#${container.id}-stop-${fromIdx}`);
                     if (nearestStop) nearestStop.classList.add('active');
                 }
             });

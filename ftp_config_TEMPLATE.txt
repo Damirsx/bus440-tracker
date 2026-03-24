@@ -1,0 +1,4 @@
+FTP_HOST=ftp.ваш-домен.ru
+FTP_USER=ваш_логин
+FTP_PASS=ваш_пароль
+FTP_PATH=/public_html
