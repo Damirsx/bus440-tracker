@@ -1,0 +1,2412 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes, viewport-fit=cover">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="theme-color" content="#000000">
+    <title>🚌 МАРШРУТ 440 • АВТОМАТИЗИРОВАННАЯ СИСТЕМА МОНИТОРИНГА</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700;800&family=Orbitron:wght@400;500;600;700;800;900&display=swap');
+        
+        * {
+            -webkit-tap-highlight-color: transparent;
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        :root {
+            --amber: #FFB000;
+            --amber-glow: rgba(255, 176, 0, 0.6);
+            --green-crt: #00FF41;
+            --red-alert: #FF1744;
+            --dark-panel: #0a0a0a;
+            --metal: #1a1a1a;
+        }
+        
+        body {
+            font-family: 'Orbitron', 'JetBrains Mono', monospace;
+            background: linear-gradient(180deg, #000000 0%, #0a0a0a 50%, #000000 100%);
+            color: var(--amber);
+            overflow-x: hidden;
+            position: relative;
+            -webkit-overflow-scrolling: touch;
+            overscroll-behavior-y: none;
+            padding-top: env(safe-area-inset-top);
+            padding-bottom: env(safe-area-inset-bottom);
+            padding-left: env(safe-area-inset-left);
+            padding-right: env(safe-area-inset-right);
+            min-height: 100vh;
+            min-height: -webkit-fill-available;
+        }
+
+        html {
+            height: -webkit-fill-available;
+        }
+        
+        /* CRT Screen Effect */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: repeating-linear-gradient(
+                0deg,
+                rgba(0, 0, 0, 0.15),
+                rgba(0, 0, 0, 0.15) 1px,
+                transparent 1px,
+                transparent 2px
+            );
+            pointer-events: none;
+            z-index: 100;
+            animation: scanlines 8s linear infinite;
+        }
+        
+        @keyframes scanlines {
+            0% { transform: translateY(0); }
+            100% { transform: translateY(10px); }
+        }
+        
+        /* Vignette Effect */
+        body::after {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            box-shadow: inset 0 0 200px rgba(0, 0, 0, 0.9);
+            pointer-events: none;
+            z-index: 99;
+        }
+        
+        /* Split-Flap Display */
+        .flip-clock {
+            display: inline-flex;
+            gap: 4px;
+            perspective: 1000px;
+        }
+        
+        .flip-digit {
+            position: relative;
+            width: 45px;
+            height: 70px;
+            background: linear-gradient(180deg, #1a1a1a 0%, #0a0a0a 50%, #000000 100%);
+            border: 2px solid var(--amber);
+            border-radius: 6px;
+            overflow: hidden;
+            box-shadow: 
+                0 0 20px var(--amber-glow),
+                inset 0 2px 10px rgba(0, 0, 0, 0.8);
+        }
+        
+        .flip-digit::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background: rgba(0, 0, 0, 0.6);
+            z-index: 2;
+        }
+        
+        .flip-number {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 40px;
+            font-weight: 800;
+            color: var(--amber);
+            text-shadow: 0 0 10px var(--amber-glow);
+            animation: flip-in 0.6s cubic-bezier(0.4, 0.0, 0.2, 1);
+        }
+        
+        @keyframes flip-in {
+            0% {
+                transform: rotateX(-90deg);
+                opacity: 0;
+            }
+            50% {
+                opacity: 0.5;
+            }
+            100% {
+                transform: rotateX(0deg);
+                opacity: 1;
+            }
+        }
+        
+        .flip-separator {
+            display: flex;
+            align-items: center;
+            font-size: 50px;
+            font-weight: 800;
+            color: var(--amber);
+            text-shadow: 0 0 20px var(--amber-glow);
+            animation: blink 2s infinite;
+        }
+        
+        @keyframes blink {
+            0%, 49%, 100% { opacity: 1; }
+            50%, 99% { opacity: 0.3; }
+        }
+        
+        /* Retro Panel */
+        .retro-panel {
+            background: linear-gradient(180deg, #1a1a1a 0%, #0a0a0a 100%);
+            border: 3px solid var(--amber);
+            border-radius: 12px;
+            box-shadow: 
+                0 0 30px var(--amber-glow),
+                inset 0 2px 20px rgba(0, 0, 0, 0.8),
+                0 10px 40px rgba(0, 0, 0, 0.9);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .retro-panel::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(
+                180deg,
+                rgba(255, 176, 0, 0.05) 0%,
+                transparent 50%,
+                rgba(0, 0, 0, 0.3) 100%
+            );
+            pointer-events: none;
+        }
+        
+        /* Glowing Text */
+        .glow-text {
+            color: var(--amber);
+            text-shadow: 
+                0 0 5px var(--amber-glow),
+                0 0 10px var(--amber-glow),
+                0 0 20px var(--amber-glow),
+                0 0 40px var(--amber-glow);
+            animation: glow-pulse 3s ease-in-out infinite;
+        }
+        
+        @keyframes glow-pulse {
+            0%, 100% {
+                text-shadow: 
+                    0 0 5px var(--amber-glow),
+                    0 0 10px var(--amber-glow),
+                    0 0 20px var(--amber-glow);
+            }
+            50% {
+                text-shadow: 
+                    0 0 10px var(--amber-glow),
+                    0 0 20px var(--amber-glow),
+                    0 0 30px var(--amber-glow),
+                    0 0 50px var(--amber-glow);
+            }
+        }
+        
+        /* Animated Button */
+        .retro-button {
+            position: relative;
+            background: linear-gradient(180deg, #2a2a2a 0%, #1a1a1a 100%);
+            border: 2px solid var(--amber);
+            color: var(--amber);
+            font-family: 'Orbitron', monospace;
+            font-weight: 700;
+            text-transform: uppercase;
+            padding: 12px 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0.0, 0.2, 1);
+            box-shadow: 
+                0 0 20px var(--amber-glow),
+                inset 0 2px 10px rgba(0, 0, 0, 0.5);
+            overflow: hidden;
+        }
+        
+        .retro-button::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, var(--amber-glow) 0%, transparent 70%);
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+        
+        .retro-button:hover {
+            transform: translateY(-2px) scale(1.02);
+            box-shadow: 
+                0 0 40px var(--amber-glow),
+                inset 0 2px 10px rgba(0, 0, 0, 0.5);
+            border-color: var(--green-crt);
+            color: var(--green-crt);
+        }
+        
+        .retro-button:hover::before {
+            opacity: 0.3;
+        }
+        
+        .retro-button:active {
+            transform: translateY(0) scale(0.98);
+        }
+        
+        .retro-button.active {
+            background: linear-gradient(180deg, var(--amber) 0%, #cc8800 100%);
+            color: #000;
+            box-shadow: 
+                0 0 60px var(--amber-glow),
+                0 0 30px var(--amber),
+                inset 0 2px 10px rgba(0, 0, 0, 0.3);
+            border-color: var(--amber);
+        }
+        
+        /* Flight Board */
+        .flight-board {
+            background: #000000;
+            border: 3px solid var(--amber);
+            border-radius: 8px;
+            padding: 2px;
+            box-shadow: 
+                0 0 30px var(--amber-glow),
+                inset 0 0 50px rgba(255, 176, 0, 0.1);
+            position: relative;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+        
+        .flight-board::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: repeating-linear-gradient(
+                0deg,
+                transparent,
+                transparent 2px,
+                rgba(255, 176, 0, 0.03) 2px,
+                rgba(255, 176, 0, 0.03) 4px
+            );
+            pointer-events: none;
+        }
+        
+        .flight-row {
+            display: grid;
+            grid-template-columns: 90px 1fr 100px 120px;
+            gap: 8px;
+            align-items: center;
+            padding: 12px;
+            margin: 4px;
+            background: linear-gradient(90deg, #0a0a0a 0%, #1a1a1a 50%, #0a0a0a 100%);
+            border: 2px solid transparent;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.4s cubic-bezier(0.4, 0.0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .flight-row::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 4px;
+            height: 100%;
+            background: var(--amber);
+            transform: scaleY(0);
+            transition: transform 0.4s cubic-bezier(0.4, 0.0, 0.2, 1);
+        }
+        
+        .flight-row:hover {
+            border-color: var(--amber);
+            background: linear-gradient(90deg, #1a1a1a 0%, #2a2a2a 50%, #1a1a1a 100%);
+            transform: translateX(8px) scale(1.01);
+            box-shadow: 
+                0 0 40px var(--amber-glow),
+                inset 0 0 30px rgba(255, 176, 0, 0.1);
+        }
+        
+        .flight-row:hover::before {
+            transform: scaleY(1);
+        }
+        
+        .flight-row.boarding {
+            animation: boarding-pulse 2s infinite;
+        }
+        
+        @keyframes boarding-pulse {
+            0%, 100% {
+                box-shadow: 0 0 20px rgba(255, 176, 0, 0.3);
+            }
+            50% {
+                box-shadow: 0 0 40px rgba(255, 176, 0, 0.6);
+            }
+        }
+        
+        .flight-row.now {
+            border-color: var(--green-crt);
+            animation: now-glow 1.5s infinite;
+        }
+        
+        @keyframes now-glow {
+            0%, 100% {
+                box-shadow: 0 0 30px rgba(0, 255, 65, 0.5);
+            }
+            50% {
+                box-shadow: 0 0 60px rgba(0, 255, 65, 0.8);
+            }
+        }
+        
+        .flight-time {
+            font-family: 'Orbitron', monospace;
+            font-size: 28px;
+            font-weight: 900;
+            color: var(--amber);
+            text-shadow: 0 0 10px var(--amber-glow);
+            letter-spacing: 1px;
+        }
+        
+        .flight-route {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            font-size: 12px;
+            color: #888;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .flight-arrow {
+            animation: arrow-move 2s ease-in-out infinite;
+        }
+        
+        @keyframes arrow-move {
+            0%, 100% { transform: translateX(0); }
+            50% { transform: translateX(4px); }
+        }
+        
+        .status-label {
+            font-family: 'Orbitron', monospace;
+            font-size: 13px;
+            font-weight: 700;
+            text-align: right;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            padding: 6px 12px;
+            border-radius: 4px;
+            border: 1px solid;
+        }
+        
+        .status-departed {
+            color: #555;
+            border-color: #555;
+            background: rgba(85, 85, 85, 0.1);
+        }
+        
+        .status-boarding {
+            color: var(--amber);
+            border-color: var(--amber);
+            background: rgba(255, 176, 0, 0.1);
+            box-shadow: 0 0 20px var(--amber-glow);
+            animation: status-pulse 2s infinite;
+        }
+        
+        .status-now {
+            color: var(--green-crt);
+            border-color: var(--green-crt);
+            background: rgba(0, 255, 65, 0.1);
+            box-shadow: 0 0 20px rgba(0, 255, 65, 0.5);
+            animation: status-pulse 1s infinite;
+        }
+        
+        .status-scheduled {
+            color: #0af;
+            border-color: #0af;
+            background: rgba(0, 170, 255, 0.1);
+        }
+        
+        @keyframes status-pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+        
+        /* Metro Line */
+        .metro-container {
+            position: relative;
+            padding: 80px 20px;
+        }
+        
+        .metro-line {
+            position: relative;
+            height: 12px;
+            background: linear-gradient(90deg, var(--amber) 0%, var(--green-crt) 100%);
+            border-radius: 6px;
+            box-shadow: 
+                0 0 30px var(--amber-glow),
+                0 0 60px var(--amber-glow),
+                inset 0 2px 10px rgba(0, 0, 0, 0.5);
+            animation: line-glow 3s ease-in-out infinite;
+        }
+        
+        @keyframes line-glow {
+            0%, 100% {
+                box-shadow: 
+                    0 0 30px var(--amber-glow),
+                    0 0 60px var(--amber-glow);
+            }
+            50% {
+                box-shadow: 
+                    0 0 50px var(--amber-glow),
+                    0 0 100px var(--amber-glow);
+            }
+        }
+        
+        .metro-stop {
+            position: absolute;
+            width: 24px;
+            height: 24px;
+            background: #000;
+            border: 4px solid var(--amber);
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            top: 50%;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0.0, 0.2, 1);
+            z-index: 10;
+            box-shadow: 0 0 20px var(--amber-glow);
+        }
+        
+        .metro-stop:hover {
+            transform: translate(-50%, -50%) scale(1.4);
+            box-shadow: 0 0 40px var(--amber-glow);
+            border-color: var(--green-crt);
+        }
+        
+        .metro-stop.active {
+            background: var(--amber);
+            animation: stop-pulse 1.5s infinite;
+            box-shadow: 0 0 40px var(--amber-glow);
+        }
+        
+        @keyframes stop-pulse {
+            0%, 100% {
+                transform: translate(-50%, -50%) scale(1);
+                box-shadow: 0 0 40px var(--amber-glow);
+            }
+            50% {
+                transform: translate(-50%, -50%) scale(1.5);
+                box-shadow: 0 0 60px var(--amber-glow);
+            }
+        }
+        
+        .metro-stop-label {
+            position: absolute;
+            top: 35px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 11px;
+            font-weight: 600;
+            white-space: nowrap;
+            color: #666;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        .metro-stop.active .metro-stop-label {
+            color: var(--amber);
+            text-shadow: 0 0 10px var(--amber-glow);
+        }
+        
+        .bus-marker {
+            position: absolute;
+            width: 48px;
+            height: 48px;
+            border: 4px solid #fff;
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            top: 50%;
+            box-shadow: 0 0 30px rgba(255, 255, 255, 0.8);
+            animation: bus-float 2s ease-in-out infinite;
+            z-index: 20;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            color: #000;
+        }
+        
+        @keyframes bus-float {
+            0%, 100% {
+                transform: translate(-50%, -50%) translateY(0);
+            }
+            50% {
+                transform: translate(-50%, -50%) translateY(-10px);
+            }
+        }
+        
+        .bus-marker.c1 { background: linear-gradient(135deg, #00ff88 0%, #00cc66 100%); }
+        .bus-marker.c2 { background: linear-gradient(135deg, #ff00ff 0%, #cc00cc 100%); }
+        .bus-marker.c3 { background: linear-gradient(135deg, #00ffff 0%, #00cccc 100%); }
+        .bus-marker.c4 { background: linear-gradient(135deg, #ffff00 0%, #cccc00 100%); }
+        
+        .bus-time-badge {
+            position: absolute;
+            top: -40px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #000;
+            border: 2px solid var(--amber);
+            color: var(--amber);
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 800;
+            white-space: nowrap;
+            box-shadow: 0 0 20px var(--amber-glow);
+            pointer-events: none;
+            font-family: 'Orbitron', monospace;
+        }
+        
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            inset: 0;
+            z-index: 200;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        
+        .modal.show {
+            display: flex;
+            animation: modal-in 0.4s cubic-bezier(0.4, 0.0, 0.2, 1);
+        }
+        
+        @keyframes modal-in {
+            from {
+                opacity: 0;
+            }
+            to {
+                opacity: 1;
+            }
+        }
+        
+        .modal-backdrop {
+            position: absolute;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.9);
+            backdrop-filter: blur(10px);
+        }
+        
+        .modal-content {
+            position: relative;
+            z-index: 10;
+            max-width: 600px;
+            max-height: 85vh;
+            width: 100%;
+            background: linear-gradient(180deg, #1a1a1a 0%, #0a0a0a 100%);
+            border: 4px solid var(--amber);
+            border-radius: 16px;
+            padding: 32px;
+            box-shadow: 
+                0 0 60px var(--amber-glow),
+                inset 0 0 50px rgba(255, 176, 0, 0.05);
+            animation: modal-content-in 0.5s cubic-bezier(0.4, 0.0, 0.2, 1);
+            overflow-y: auto;
+        }
+        
+        .modal-content::-webkit-scrollbar {
+            width: 8px;
+        }
+        
+        .modal-content::-webkit-scrollbar-track {
+            background: #0a0a0a;
+            border-radius: 4px;
+        }
+        
+        .modal-content::-webkit-scrollbar-thumb {
+            background: var(--amber);
+            border-radius: 4px;
+            box-shadow: 0 0 10px var(--amber-glow);
+        }
+        
+        @media (max-width: 640px) {
+            .modal-content {
+                max-height: 90vh;
+                padding: 20px;
+            }
+        }
+        
+        @keyframes modal-content-in {
+            from {
+                opacity: 0;
+                transform: scale(0.9) translateY(50px);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1) translateY(0);
+            }
+        }
+        
+        /* Weather Widget */
+        .weather-widget {
+            background: linear-gradient(135deg, #1a1a1a 0%, #0a0a0a 100%);
+            border: 2px solid var(--amber);
+            border-radius: 12px;
+            padding: 16px;
+            box-shadow: 0 0 20px var(--amber-glow);
+            transition: all 0.3s;
+        }
+        
+        .weather-widget:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 0 40px var(--amber-glow);
+        }
+        
+        /* Fade in animation */
+        .fade-in {
+            animation: fadeIn 0.6s ease-in;
+        }
+        
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        /* Header glitch */
+        .glitch {
+            position: relative;
+        }
+        
+        .glitch::before,
+        .glitch::after {
+            content: attr(data-text);
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+        }
+        
+        .glitch::before {
+            left: 2px;
+            text-shadow: -2px 0 var(--red-alert);
+            clip: rect(24px, 550px, 90px, 0);
+            animation: glitch-anim 3s infinite linear alternate-reverse;
+        }
+        
+        .glitch::after {
+            left: -2px;
+            text-shadow: -2px 0 var(--green-crt), 2px 2px var(--red-alert);
+            clip: rect(85px, 550px, 140px, 0);
+            animation: glitch-anim 2s infinite linear alternate-reverse;
+        }
+        
+        @keyframes glitch-anim {
+            0% { clip: rect(30px, 9999px, 80px, 0); }
+            20% { clip: rect(90px, 9999px, 120px, 0); }
+            40% { clip: rect(10px, 9999px, 50px, 0); }
+            60% { clip: rect(60px, 9999px, 100px, 0); }
+            80% { clip: rect(20px, 9999px, 70px, 0); }
+            100% { clip: rect(50px, 9999px, 110px, 0); }
+        }
+        
+        /* Mobile Responsive */
+        @media (max-width: 640px) {
+            .flip-digit {
+                width: 30px;
+                height: 48px;
+            }
+            
+            .flip-number {
+                font-size: 24px;
+            }
+            
+            .flip-separator {
+                font-size: 36px;
+            }
+            
+            .flight-board-header {
+                grid-template-columns: 70px 1fr 75px auto !important;
+                gap: 4px !important;
+                padding: 8px 10px !important;
+                font-size: 9px !important;
+            }
+            
+            .flight-row {
+                grid-template-columns: 70px 1fr 75px auto;
+                gap: 4px;
+                padding: 10px 8px;
+            }
+            
+            .flight-time {
+                font-size: 18px;
+                letter-spacing: 0;
+            }
+            
+            .flight-route {
+                font-size: 9px;
+                gap: 3px;
+            }
+            
+            .flight-route span {
+                overflow: hidden;
+                text-overflow: ellipsis;
+                max-width: 60px;
+            }
+            
+            .status-label {
+                font-size: 10px;
+                padding: 4px 6px;
+                letter-spacing: 0;
+                white-space: nowrap;
+            }
+            
+            .metro-stop {
+                width: 16px;
+                height: 16px;
+                border-width: 3px;
+            }
+            
+            .metro-stop-label {
+                font-size: 8px;
+                letter-spacing: 0;
+                max-width: 60px;
+                white-space: normal;
+                text-align: center;
+                line-height: 1.2;
+            }
+            
+            .metro-container {
+                padding: 60px 10px;
+            }
+            
+            .bus-marker {
+                width: 34px;
+                height: 34px;
+                border-width: 3px;
+            }
+            
+            .bus-time-badge {
+                font-size: 10px;
+                padding: 2px 6px;
+                top: -32px;
+            }
+            
+            .retro-panel {
+                border-width: 2px;
+                border-radius: 8px;
+            }
+            
+            .weather-widget {
+                padding: 10px;
+            }
+            
+            .weather-widget .text-2xl {
+                font-size: 1.1rem;
+            }
+            
+            .modal-content {
+                max-height: 92vh;
+                padding: 16px;
+                border-width: 2px;
+                border-radius: 12px;
+                margin: 8px;
+            }
+        }
+        
+        /* Extra small phones (iPhone SE, Galaxy A series folded) */
+        @media (max-width: 380px) {
+            .flip-digit {
+                width: 26px;
+                height: 42px;
+            }
+            
+            .flip-number {
+                font-size: 20px;
+            }
+            
+            .flip-separator {
+                font-size: 30px;
+            }
+            
+            .flight-board-header {
+                grid-template-columns: 60px 1fr 60px auto !important;
+            }
+            
+            .flight-row {
+                grid-template-columns: 60px 1fr 60px auto;
+            }
+            
+            .flight-time {
+                font-size: 16px;
+            }
+            
+            .flight-route {
+                font-size: 8px;
+            }
+            
+            .status-label {
+                font-size: 9px;
+                padding: 3px 5px;
+            }
+        }
+        
+        /* Tablets (iPad, Samsung Tab) */
+        @media (min-width: 641px) and (max-width: 1024px) {
+            .flight-row {
+                grid-template-columns: 100px 1fr 110px 140px;
+                gap: 12px;
+            }
+        }
+        
+        /* AI Chat mobile fixes */
+        @media (max-width: 480px) {
+            #aiChatWindow {
+                width: calc(100vw - 24px) !important;
+                right: 12px !important;
+                left: 12px !important;
+                bottom: 80px !important;
+                max-height: calc(100vh - 100px) !important;
+                max-height: calc(100dvh - 100px) !important;
+            }
+            
+            #aiChatButton {
+                bottom: 16px !important;
+                right: 16px !important;
+                width: 52px !important;
+                height: 52px !important;
+                font-size: 24px !important;
+            }
+            
+            #notificationPanel {
+                left: 12px !important;
+                right: 12px !important;
+                max-width: none !important;
+            }
+        }
+        
+        /* iOS Safari specific */
+        @supports (-webkit-touch-callout: none) {
+            body {
+                min-height: -webkit-fill-available;
+            }
+            
+            .sticky {
+                position: -webkit-sticky;
+            }
+            
+            .modal {
+                padding-bottom: env(safe-area-inset-bottom);
+            }
+        }
+        
+        /* Reduce animations on mobile for performance */
+        @media (max-width: 768px) {
+            body::before {
+                animation: none;
+                background: repeating-linear-gradient(
+                    0deg,
+                    rgba(0, 0, 0, 0.1),
+                    rgba(0, 0, 0, 0.1) 1px,
+                    transparent 1px,
+                    transparent 3px
+                );
+            }
+            
+            .glitch::before,
+            .glitch::after {
+                display: none;
+            }
+        }
+        
+        /* Respect reduced motion preference */
+        @media (prefers-reduced-motion: reduce) {
+            *, *::before, *::after {
+                animation-duration: 0.01ms !important;
+                animation-iteration-count: 1 !important;
+                transition-duration: 0.01ms !important;
+            }
+        }
+        
+        /* Dynamic viewport height for modern mobile browsers */
+        @supports (height: 100dvh) {
+            .modal {
+                height: 100dvh;
+            }
+        }
+        
+        /* Samsung Internet browser bottom bar compensation */
+        @media (max-width: 768px) {
+            #notificationPanel {
+                bottom: calc(16px + env(safe-area-inset-bottom)) !important;
+            }
+            
+            #aiChatButton {
+                bottom: calc(24px + env(safe-area-inset-bottom)) !important;
+            }
+        }
+    </style>
+</head>
+<body>
+    
+    <!-- Главный контейнер -->
+    <div class="min-h-screen pb-8 relative z-10">
+        
+        <!-- Заголовок -->
+        <div class="sticky top-0 z-40 retro-panel border-x-0 border-t-0 rounded-none">
+            <div class="max-w-7xl mx-auto px-4 py-6">
+                <div class="flex items-center justify-between gap-4 flex-wrap">
+                    <div class="flex-1 min-w-0">
+                        <h1 class="text-2xl md:text-4xl font-black glow-text uppercase tracking-wider mb-2">
+                            🚌 МАРШРУТ 440
+                        </h1>
+                        <p class="text-xs md:text-sm opacity-70 uppercase tracking-widest" style="color: var(--green-crt);">
+                            ✦ УДАЧНОЙ ДОРОГИ ДОМОЙ ✦
+                        </p>
+                    </div>
+                    
+                    <!-- Split-Flap Clock -->
+                    <div class="flex flex-col items-end gap-2">
+                        <div class="flip-clock" id="flipClock"></div>
+                        <div id="currentDate" class="text-xs uppercase tracking-wider opacity-70"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Погода -->
+        <div class="max-w-7xl mx-auto px-4 py-4">
+            <div class="grid grid-cols-2 gap-4">
+                <div class="weather-widget">
+                    <div class="flex items-center gap-3">
+                        <div id="weatherIconStart" style="font-size: 32px;">⏳</div>
+                        <div class="flex-1 min-w-0">
+                            <div class="text-xs opacity-60 uppercase tracking-wider">РЫБАЦКОЕ</div>
+                            <div id="weatherTempStart" class="text-2xl font-black glow-text">--°</div>
+                            <div id="weatherDescStart" class="text-xs opacity-50 truncate"></div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="weather-widget">
+                    <div class="flex items-center gap-3">
+                        <div id="weatherIconEnd" style="font-size: 32px;">⏳</div>
+                        <div class="flex-1 min-w-0">
+                            <div class="text-xs opacity-60 uppercase tracking-wider">ПАВЛОВО-2</div>
+                            <div id="weatherTempEnd" class="text-2xl font-black glow-text">--°</div>
+                            <div id="weatherDescEnd" class="text-xs opacity-50 truncate"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Табы -->
+        <div class="max-w-7xl mx-auto px-4 py-4">
+            <div class="retro-panel p-3">
+                <div class="flex flex-wrap justify-center gap-2 sm:grid sm:grid-cols-3 lg:grid-cols-5 sm:gap-3">
+                    <button onclick="switchTab('rybatskoe')" id="tab-rybatskoe" class="retro-button text-xs sm:text-sm flex-1 min-w-[calc(50%-0.25rem)] sm:min-w-0">
+                        → РЫБАЦКОЕ
+                    </button>
+                    <button onclick="switchTab('lobanovo')" id="tab-lobanovo" class="retro-button text-xs sm:text-sm flex-1 min-w-[calc(50%-0.25rem)] sm:min-w-0">
+                        ← ЛОБАНОВО
+                    </button>
+                    <button onclick="switchTab('map')" id="tab-map" class="retro-button text-xs sm:text-sm flex-1 min-w-[calc(33%-0.25rem)] sm:min-w-0">
+                        ◉ ТРАССА
+                    </button>
+                    <button onclick="switchTab('traffic')" id="tab-traffic" class="retro-button text-xs sm:text-sm flex-1 min-w-[calc(33%-0.25rem)] sm:min-w-0">
+                        🚦 ПРОБКИ
+                    </button>
+                    <button onclick="switchTab('alternatives')" id="tab-alternatives" class="retro-button text-xs sm:text-sm flex-1 min-w-[calc(33%-0.25rem)] sm:min-w-0">
+                        🔄 ДРУГИЕ
+                    </button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Контент вкладок -->
+        <div class="max-w-7xl mx-auto px-4">
+            
+            <!-- Вкладка Рыбацкое -->
+            <div id="content-rybatskoe" class="tab-content hidden">
+                <div class="flight-board">
+                    <div id="schedule-rybatskoe"></div>
+                </div>
+            </div>
+            
+            <!-- Вкладка Лобаново -->
+            <div id="content-lobanovo" class="tab-content hidden">
+                <div class="flight-board">
+                    <div id="schedule-lobanovo"></div>
+                </div>
+            </div>
+            
+            <!-- Вкладка Маршрут -->
+            <div id="content-map" class="tab-content hidden">
+                <div class="retro-panel p-3 sm:p-6">
+                    
+                    <!-- Направление 1 -->
+                    <div class="mb-12">
+                        <div class="text-sm uppercase tracking-widest opacity-60 mb-4 flex items-center gap-2">
+                            <span>▶</span>
+                            <span>РЫБАЦКОЕ → ПАВЛОВО-2</span>
+                        </div>
+                        <div class="metro-container">
+                            <div class="metro-line" id="metroLine1"></div>
+                        </div>
+                    </div>
+                    
+                    <!-- Разделитель -->
+                    <div class="border-t border-amber-900 opacity-30 my-8"></div>
+                    
+                    <!-- Направление 2 -->
+                    <div>
+                        <div class="text-sm uppercase tracking-widest opacity-60 mb-4 flex items-center gap-2">
+                            <span>◀</span>
+                            <span>ПАВЛОВО-2 → РЫБАЦКОЕ</span>
+                        </div>
+                        <div class="metro-container">
+                            <div class="metro-line" id="metroLine2" style="background: linear-gradient(90deg, var(--green-crt) 0%, var(--amber) 100%);"></div>
+                        </div>
+                    </div>
+                    
+                </div>
+            </div>
+            
+            <!-- Вкладка Пробки -->
+            <div id="content-traffic" class="tab-content hidden">
+                <div class="retro-panel p-3 sm:p-6">
+                    <div class="text-lg font-bold glow-text uppercase tracking-wider mb-6 flex items-center gap-3">
+                        <span>🚦</span>
+                        <span>ПРОБКИ И ВРЕМЯ В ПУТИ</span>
+                    </div>
+                    
+                    <!-- Текущая ситуация -->
+                    <div class="grid grid-cols-3 gap-2 sm:gap-4 mb-6">
+                        <div class="p-3 sm:p-6 bg-black bg-opacity-50 border-2 border-amber rounded-lg text-center">
+                            <div class="text-xs opacity-60 mb-1 sm:mb-2 uppercase" style="font-size: clamp(8px, 2vw, 12px);">Загруженность</div>
+                            <div id="trafficLevel" class="text-2xl sm:text-4xl font-black glow-text mb-1 sm:mb-2">—</div>
+                            <div id="trafficLevelText" class="text-xs sm:text-sm opacity-70" style="word-break: break-word;">Загрузка...</div>
+                        </div>
+                        <div class="p-3 sm:p-6 bg-black bg-opacity-50 border-2 border-green-crt rounded-lg text-center">
+                            <div class="text-xs opacity-60 mb-1 sm:mb-2 uppercase" style="font-size: clamp(8px, 2vw, 12px);">Время сейчас</div>
+                            <div id="currentTripTime" class="text-2xl sm:text-4xl font-black text-green-crt mb-1 sm:mb-2" style="text-shadow: 0 0 20px rgba(0,255,65,0.5);">—</div>
+                            <div class="text-xs sm:text-sm opacity-70">минут</div>
+                        </div>
+                        <div class="p-3 sm:p-6 bg-black bg-opacity-50 border-2 border-gray-600 rounded-lg text-center">
+                            <div class="text-xs opacity-60 mb-1 sm:mb-2 uppercase" style="font-size: clamp(8px, 2vw, 12px);">Обычно</div>
+                            <div class="text-2xl sm:text-4xl font-black text-gray-400 mb-1 sm:mb-2">68</div>
+                            <div class="text-xs sm:text-sm opacity-70">минут</div>
+                        </div>
+                    </div>
+                    
+                    <!-- График загруженности -->
+                    <div class="mb-6">
+                        <h4 class="text-sm font-bold uppercase tracking-wider mb-3 opacity-80">График загруженности по часам:</h4>
+                        <div id="trafficChart" class="space-y-2">
+                            <!-- График будет добавлен динамически -->
+                        </div>
+                    </div>
+                    
+                    <!-- Рекомендации -->
+                    <div id="trafficRecommendations" class="p-4 bg-green-crt bg-opacity-10 border-2 border-green-crt rounded-lg">
+                        <p class="text-sm">
+                            💡 <strong>РЕКОМЕНДАЦИЯ:</strong> <span id="trafficAdvice">Загрузка данных...</span>
+                        </p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Вкладка Альтернативы -->
+            <div id="content-alternatives" class="tab-content hidden">
+                <div class="retro-panel p-3 sm:p-6">
+                    <div class="text-lg font-bold glow-text uppercase tracking-wider mb-6 flex items-center gap-3">
+                        <span>🔄</span>
+                        <span>АЛЬТЕРНАТИВНЫЕ МАРШРУТЫ</span>
+                    </div>
+                    
+                    <!-- Маршрутки -->
+                    <div class="mb-8">
+                        <h4 class="text-md font-bold uppercase tracking-wider mb-4 flex items-center gap-2">
+                            <span>🚐</span>
+                            <span>МАРШРУТНЫЕ ТАКСИ</span>
+                        </h4>
+                        <div class="space-y-3" id="marshrutkiList">
+                            <!-- Маршрутки будут добавлены динамически -->
+                        </div>
+                    </div>
+                    
+                    <!-- Другие варианты -->
+                    <div class="border-t border-amber-900 opacity-30 my-6"></div>
+                    
+                    <div class="space-y-4">
+                        <h4 class="text-md font-bold uppercase tracking-wider mb-4">ДРУГИЕ ВАРИАНТЫ:</h4>
+                        
+                        <div class="p-3 sm:p-4 bg-black bg-opacity-50 border-2 border-blue-500 rounded-lg">
+                            <div class="flex items-center justify-between gap-2 mb-2 flex-wrap">
+                                <div class="flex items-center gap-2 sm:gap-3 min-w-0 flex-1">
+                                    <span class="text-xl sm:text-2xl">🚇</span>
+                                    <div class="min-w-0">
+                                        <div class="font-bold text-sm">МЕТРО + АВТОБУС</div>
+                                        <div class="text-xs opacity-70 truncate">Рыбацкое → Обухово → К-440А</div>
+                                    </div>
+                                </div>
+                                <div class="text-right flex-shrink-0">
+                                    <div class="text-lg sm:text-xl font-bold text-blue-400">~45 мин</div>
+                                    <div class="text-xs opacity-70">70₽</div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="p-3 sm:p-4 bg-black bg-opacity-50 border-2 border-yellow-500 rounded-lg">
+                            <div class="flex items-center justify-between gap-2 mb-2 flex-wrap">
+                                <div class="flex items-center gap-2 sm:gap-3 min-w-0 flex-1">
+                                    <span class="text-xl sm:text-2xl">🚕</span>
+                                    <div class="min-w-0">
+                                        <div class="font-bold text-sm">ЯНДЕКС.ТАКСИ</div>
+                                        <div class="text-xs opacity-70 truncate">Прямая доставка до пункта</div>
+                                    </div>
+                                </div>
+                                <div class="text-right flex-shrink-0">
+                                    <div class="text-lg sm:text-xl font-bold text-yellow-400">~25 мин</div>
+                                    <div class="text-xs opacity-70">450-550₽</div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="p-3 sm:p-4 bg-black bg-opacity-50 border-2 border-purple-500 rounded-lg">
+                            <div class="flex items-center justify-between gap-2 mb-2 flex-wrap">
+                                <div class="flex items-center gap-2 sm:gap-3 min-w-0 flex-1">
+                                    <span class="text-xl sm:text-2xl">🚙</span>
+                                    <div class="min-w-0">
+                                        <div class="font-bold text-sm">КАРШЕРИНГ</div>
+                                        <div class="text-xs opacity-70 truncate">Яндекс.Драйв, Делимобиль</div>
+                                    </div>
+                                </div>
+                                <div class="text-right flex-shrink-0">
+                                    <div class="text-lg sm:text-xl font-bold text-purple-400">~30 мин</div>
+                                    <div class="text-xs opacity-70">250-350₽</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+        </div>
+    </div>
+    
+    <!-- Панель уведомлений -->
+    <div id="notificationPanel" class="fixed bottom-4 right-4 z-50 max-w-sm">
+        <!-- Уведомления будут появляться здесь -->
+    </div>
+    
+    <!-- AI-Помощник -->
+    <button id="aiChatButton" onclick="toggleAiChat()" class="fixed bottom-6 right-6 z-50 retro-button" style="width: 60px; height: 60px; border-radius: 50%; font-size: 28px; padding: 0; box-shadow: 0 0 20px rgba(255, 176, 0, 0.5);">
+        🤖
+    </button>
+    
+    <div id="aiChatWindow" class="fixed bottom-24 right-6 z-50 retro-panel" style="width: min(380px, calc(100vw - 24px)); max-height: min(500px, calc(100vh - 120px)); display: none; flex-direction: column;">
+        <!-- Header -->
+        <div class="flex justify-between items-center p-4 border-b-2 border-amber">
+            <div>
+                <div class="text-lg font-black glow-text uppercase">🤖 AI-ПОМОЩНИК</div>
+                <div class="text-xs opacity-60">Маршрутчик v1.0</div>
+            </div>
+            <button onclick="toggleAiChat()" class="text-2xl opacity-60 hover:opacity-100 transition-opacity">✕</button>
+        </div>
+        
+        <!-- Messages -->
+        <div id="aiChatMessages" class="flex-1 overflow-y-auto p-4" style="max-height: 320px; min-height: 200px;">
+            <!-- Сообщения будут здесь -->
+        </div>
+        
+        <!-- Input -->
+        <div class="p-4 border-t-2 border-amber">
+            <div class="flex gap-2">
+                <input 
+                    type="text" 
+                    id="aiChatInput" 
+                    placeholder="Напишите вопрос..." 
+                    class="flex-1 bg-black border-2 border-amber rounded px-3 py-2 text-sm focus:border-green-crt outline-none"
+                    onkeypress="if(event.key==='Enter') sendAiMessage()"
+                />
+                <button onclick="sendAiMessage()" class="retro-button text-sm px-4">▶</button>
+            </div>
+            <div class="mt-2 flex flex-wrap gap-1">
+                <button onclick="sendQuickCommand('следующий')" class="text-xs px-2 py-1 border border-amber rounded hover:bg-amber hover:text-black transition-all">Когда автобус?</button>
+                <button onclick="sendQuickCommand('пробки')" class="text-xs px-2 py-1 border border-amber rounded hover:bg-amber hover:text-black transition-all">Пробки</button>
+                <button onclick="sendQuickCommand('погода')" class="text-xs px-2 py-1 border border-amber rounded hover:bg-amber hover:text-black transition-all">Погода</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Модальное окно -->
+    <div id="flightModal" class="modal" onclick="closeModal(event)">
+        <div class="modal-backdrop"></div>
+        <div class="modal-content" onclick="event.stopPropagation()">
+            <div class="flex justify-between items-start mb-6">
+                <h3 class="text-2xl font-black glow-text uppercase tracking-wider">ДЕТАЛИ РЕЙСА</h3>
+                <button onclick="closeModal()" class="retro-button" style="padding: 8px 12px;">✕</button>
+            </div>
+            <div id="modalContent"></div>
+        </div>
+    </div>
+
+    <script>
+        // ==========================================
+        // КОНСТАНТЫ
+        // ==========================================
+        
+        const SCHEDULE_FULL = {
+            rybatskoe: [
+                '05:40', '06:10', '06:40', '07:10', '07:40', '08:10', '08:40', '09:10',
+                '09:40', '10:10', '10:40', '11:10', '11:40', '12:10', '12:40', '13:10',
+                '13:40', '14:10', '14:40', '15:10', '15:40', '16:10', '16:40', '17:10',
+                '17:40', '18:10', '18:40', '19:10', '19:40', '20:10', '20:40', '21:10',
+                '21:40', '22:10', '22:40', '23:10', '23:40'
+            ],
+            lobanovo: [
+                '06:20', '06:50', '07:20', '07:50', '08:20', '08:50', '09:20', '09:50',
+                '10:20', '10:50', '11:20', '11:50', '12:20', '12:50', '13:20', '13:50',
+                '14:20', '14:50', '15:20', '15:50', '16:20', '16:50', '17:20', '17:50',
+                '18:20', '18:50', '19:20', '19:50', '20:20', '20:50', '21:20', '21:50',
+                '22:20', '22:50', '23:20', '23:50'
+            ]
+        };
+        
+        const STOPS = [
+            { name: 'Рыбацкое', distanceKm: 0 },
+            { name: 'Шлиссельбургское шоссе', distanceKm: 2.5 },
+            { name: 'Ивановская', distanceKm: 4.8 },
+            { name: 'Отрадное', distanceKm: 8.2 },
+            { name: 'Ладожская', distanceKm: 12.1 },
+            { name: 'Дубровка', distanceKm: 17.5 },
+            { name: 'Павлово', distanceKm: 21.8 },
+            { name: 'Лобаново', distanceKm: 25.0 }
+        ];
+        
+        const TRIP_DURATION = 68;
+        const TOTAL_DISTANCE = 25;
+        const BUS_COLORS = ['c1', 'c2', 'c3', 'c4'];
+        
+
+        
+        // Маршрутки
+        const MARSHRUTKI = [
+            { 
+                number: 'К-440А',
+                route: 'Рыбацкое → Лобаново (параллельно)',
+                time: '60-70 мин',
+                price: '65₽',
+                frequency: 'Каждые 20-25 минут',
+                info: 'Идет тем же маршрутом, меньше остановок'
+            },
+            { 
+                number: 'К-476',
+                route: 'Рыбацкое → Ладожская → Лобаново',
+                time: '75 мин',
+                price: '70₽',
+                frequency: 'Каждые 30 минут',
+                info: 'Альтернативный путь через центр'
+            },
+            { 
+                number: 'К-350',
+                route: 'Рыбацкое → Дубровка',
+                time: '45 мин',
+                price: '55₽',
+                frequency: 'Каждые 15-20 минут',
+                info: 'Только до Дубровки'
+            }
+        ];
+        
+        // Данные о пробках (симуляция)
+        const TRAFFIC_DATA = {
+            // Загруженность по часам (0-10 баллов)
+            hourly: [
+                {hour: '05:00', level: 1}, {hour: '06:00', level: 3}, {hour: '07:00', level: 7},
+                {hour: '08:00', level: 9}, {hour: '09:00', level: 8}, {hour: '10:00', level: 5},
+                {hour: '11:00', level: 4}, {hour: '12:00', level: 5}, {hour: '13:00', level: 6},
+                {hour: '14:00', level: 5}, {hour: '15:00', level: 6}, {hour: '16:00', level: 7},
+                {hour: '17:00', level: 9}, {hour: '18:00', level: 10}, {hour: '19:00', level: 8},
+                {hour: '20:00', level: 6}, {hour: '21:00', level: 4}, {hour: '22:00', level: 2},
+                {hour: '23:00', level: 1}
+            ],
+            // Множитель времени в пути в зависимости от загруженности
+            getMultiplier: function(level) {
+                if (level <= 2) return 1.0;  // Свободно
+                if (level <= 4) return 1.1;  // Небольшие задержки
+                if (level <= 6) return 1.2;  // Средняя загруженность
+                if (level <= 8) return 1.35; // Загружено
+                return 1.5;                   // Пробки
+            }
+        };
+        
+        let currentTab = 'rybatskoe';
+        let weatherData = { start: null, end: null };
+        let prevTime = '';
+        
+        // ==========================================
+        // ИНИЦИАЛИЗАЦИЯ
+        // ==========================================
+        
+        function init() {
+            console.log('🚀 SYSTEM INITIALIZED');
+            
+            updateClock();
+            setInterval(updateClock, 1000);
+            
+            loadWeather();
+            setInterval(loadWeather, 600000);
+            
+            // Запрос разрешения на уведомления
+            requestNotificationPermission();
+            
+            switchTab('rybatskoe');
+            
+            setInterval(() => {
+                if (currentTab === 'map') {
+                    renderMetroLines();
+                } else {
+                    updateFlightStatuses();
+                }
+            }, 1000);
+        }
+        
+        // ==========================================
+        // SPLIT-FLAP CLOCK
+        // ==========================================
+        
+        function updateClock() {
+            const now = new Date();
+            const timeStr = now.toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' });
+            const dateStr = now.toLocaleDateString('ru-RU', { day: 'numeric', month: 'short' }).toUpperCase();
+            
+            if (timeStr !== prevTime) {
+                renderFlipClock(timeStr);
+                prevTime = timeStr;
+            }
+            
+            document.getElementById('currentDate').textContent = dateStr;
+        }
+        
+        function renderFlipClock(timeStr) {
+            const container = document.getElementById('flipClock');
+            const digits = timeStr.split('');
+            
+            let html = '';
+            digits.forEach(char => {
+                if (char === ':') {
+                    html += '<div class="flip-separator">:</div>';
+                } else {
+                    html += `
+                        <div class="flip-digit">
+                            <div class="flip-number">${char}</div>
+                        </div>
+                    `;
+                }
+            });
+            
+            container.innerHTML = html;
+        }
+        
+        // ==========================================
+        // ПОГОДА
+        // ==========================================
+        
+        async function loadWeather() {
+            try {
+                const respStart = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=59.8305&longitude=30.4960&current=temperature_2m,weather_code&timezone=Europe/Moscow`);
+                const dataStart = await respStart.json();
+                weatherData.start = dataStart.current;
+                updateWeatherDisplay('start', dataStart.current);
+            } catch (error) {
+                console.error('Weather error (Start):', error);
+            }
+            
+            try {
+                const respEnd = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=59.9450&longitude=30.8450&current=temperature_2m,weather_code&timezone=Europe/Moscow`);
+                const dataEnd = await respEnd.json();
+                weatherData.end = dataEnd.current;
+                updateWeatherDisplay('end', dataEnd.current);
+            } catch (error) {
+                console.error('Weather error (End):', error);
+            }
+        }
+        
+        function updateWeatherDisplay(location, data) {
+            if (!data) return;
+            
+            const suffix = location === 'start' ? 'Start' : 'End';
+            const temp = Math.round(data.temperature_2m);
+            const icon = getWeatherIcon(data.weather_code);
+            const desc = getWeatherDesc(data.weather_code);
+            
+            document.getElementById(`weatherIcon${suffix}`).textContent = icon;
+            document.getElementById(`weatherTemp${suffix}`).textContent = `${temp}°`;
+            document.getElementById(`weatherDesc${suffix}`).textContent = desc;
+        }
+        
+        function getWeatherIcon(code) {
+            if (code === 0) return '☀️';
+            if (code <= 3) return '⛅';
+            if (code <= 48) return '☁️';
+            if (code <= 67) return '🌧️';
+            if (code <= 77) return '🌨️';
+            if (code <= 82) return '🌧️';
+            if (code <= 86) return '🌨️';
+            if (code <= 99) return '⛈️';
+            return '🌤️';
+        }
+        
+        function getWeatherDesc(code) {
+            if (code === 0) return 'ЯСНО';
+            if (code <= 3) return 'ОБЛАЧНО';
+            if (code <= 48) return 'ТУМАН';
+            if (code <= 67) return 'ДОЖДЬ';
+            if (code <= 77) return 'СНЕГ';
+            if (code <= 82) return 'ЛИВЕНЬ';
+            if (code <= 86) return 'СНЕГОПАД';
+            if (code <= 99) return 'ГРОЗА';
+            return 'ПЕРЕМЕННО';
+        }
+        
+        // ==========================================
+        // ПЕРЕКЛЮЧЕНИЕ ВКЛАДОК
+        // ==========================================
+        
+        function switchTab(tabName) {
+            currentTab = tabName;
+            
+            document.querySelectorAll('.retro-button').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            
+            document.getElementById('tab-' + tabName).classList.add('active');
+            
+            document.querySelectorAll('.tab-content').forEach(content => {
+                content.classList.add('hidden');
+            });
+            
+            const activeContent = document.getElementById('content-' + tabName);
+            activeContent.classList.remove('hidden');
+            activeContent.classList.add('fade-in');
+            
+            if (tabName === 'map') {
+                renderMetroLines();
+            } else if (tabName === 'traffic') {
+                renderTrafficInfo();
+            } else if (tabName === 'alternatives') {
+                renderAlternatives();
+            } else if (tabName === 'rybatskoe' || tabName === 'lobanovo') {
+                renderFlightBoard(tabName);
+            }
+        }
+        
+        // ==========================================
+        // FLIGHT BOARD
+        // ==========================================
+        
+        function renderFlightBoard(direction) {
+            const schedule = SCHEDULE_FULL[direction];
+            const containerId = 'schedule-' + direction;
+            const container = document.getElementById(containerId);
+            
+            const now = new Date();
+            const nowMinutes = now.getHours() * 60 + now.getMinutes();
+            
+            const fromStop = direction === 'rybatskoe' ? 'РЫБАЦКОЕ' : 'ЛОБАНОВО';
+            const toStop = direction === 'rybatskoe' ? 'ЛОБАНОВО' : 'РЫБАЦКОЕ';
+            
+            // Функция конвертации минут в часы:минуты
+            function formatMinutes(mins) {
+                if (mins <= 60) return `${mins} МИН`;
+                const hours = Math.floor(mins / 60);
+                const minutes = mins % 60;
+                return `${hours} Ч ${minutes} МИН`;
+            }
+            
+            let html = `
+                <div class="flight-board-header" style="display: grid; grid-template-columns: 90px 1fr 100px 120px; gap: 8px; padding: 10px 12px; margin: 4px; border-bottom: 2px solid rgba(255,176,0,0.3); font-size: 10px; font-weight: 700; color: var(--amber); text-transform: uppercase; letter-spacing: 1px;">
+                    <div>ВРЕМЯ</div>
+                    <div>МАРШРУТ</div>
+                    <div>ПУТЬ</div>
+                    <div style="text-align: right;">СТАТУС</div>
+                </div>
+            `;
+            
+            schedule.forEach(time => {
+                const [h, m] = time.split(':').map(Number);
+                const timeMinutes = h * 60 + m;
+                const minutesUntil = timeMinutes - nowMinutes;
+                
+                let statusClass = '';
+                let statusText = '';
+                let rowClass = '';
+                
+                if (minutesUntil < -5) {
+                    statusClass = 'status-departed';
+                    statusText = 'ОТПРАВЛЕН';
+                    rowClass = 'departed';
+                } else if (minutesUntil < 0) {
+                    statusClass = 'status-boarding';
+                    statusText = 'ПОСАДКА';
+                    rowClass = 'boarding';
+                } else if (minutesUntil < 2) {
+                    statusClass = 'status-now';
+                    statusText = '◉ СЕЙЧАС';
+                    rowClass = 'now';
+                } else if (minutesUntil <= 10) {
+                    statusClass = 'status-boarding';
+                    statusText = `▶ ${minutesUntil} МИН`;
+                    rowClass = 'boarding';
+                } else {
+                    statusClass = 'status-scheduled';
+                    statusText = `◷ ${formatMinutes(minutesUntil)}`;
+                }
+                
+                html += `
+                    <div class="flight-row ${rowClass}" onclick="showFlightDetails('${time}', ${timeMinutes}, '${direction}')">
+                        <div class="flight-time">${time}</div>
+                        <div class="flight-route">
+                            <span>${fromStop}</span>
+                            <svg class="w-5 h-5 flight-arrow" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path>
+                            </svg>
+                            <span>${toStop}</span>
+                        </div>
+                        <div style="text-align: center; color: #888; font-size: 12px; font-weight: 600; opacity: 0.8;">${TRIP_DURATION} мин</div>
+                        <div class="status-label ${statusClass}">${statusText}</div>
+                    </div>
+                `;
+            });
+            
+            container.innerHTML = html;
+        }
+        
+        function updateFlightStatuses() {
+            // Обновляет статусы в реальном времени
+        }
+        
+        // ==========================================
+        // METRO LINES
+        // ==========================================
+        
+        function renderMetroLines() {
+            renderMetroLine('metroLine1', 'rybatskoe');
+            renderMetroLine('metroLine2', 'lobanovo');
+        }
+        
+        function renderMetroLine(containerId, direction) {
+            const container = document.getElementById(containerId);
+            container.innerHTML = '';
+            
+            // Остановки
+            STOPS.forEach((stop, index) => {
+                const percentage = (stop.distanceKm / TOTAL_DISTANCE) * 100;
+                
+                const stopEl = document.createElement('div');
+                stopEl.className = 'metro-stop';
+                stopEl.style.left = percentage + '%';
+                stopEl.id = `${containerId}-stop-${index}`;
+                
+                const labelEl = document.createElement('div');
+                labelEl.className = 'metro-stop-label';
+                labelEl.textContent = stop.name;
+                
+                stopEl.appendChild(labelEl);
+                container.appendChild(stopEl);
+            });
+            
+            // Автобусы
+            simulateBuses(container, direction);
+        }
+        
+        function simulateBuses(container, direction) {
+            const schedule = SCHEDULE_FULL[direction];
+            const now = new Date();
+            const nowMinutes = now.getHours() * 60 + now.getMinutes();
+            
+            let activeBuses = [];
+            let colorIndex = 0;
+            
+            for (const time of schedule) {
+                const [h, m] = time.split(':').map(Number);
+                const departMinutes = h * 60 + m;
+                const arrivalMinutes = departMinutes + TRIP_DURATION;
+                
+                if (nowMinutes >= departMinutes && nowMinutes <= arrivalMinutes) {
+                    const elapsedMinutes = nowMinutes - departMinutes;
+                    const progress = elapsedMinutes / TRIP_DURATION;
+                    const distanceCovered = progress * TOTAL_DISTANCE;
+                    
+                    activeBuses.push({
+                        time,
+                        progress,
+                        distanceCovered,
+                        color: BUS_COLORS[colorIndex % BUS_COLORS.length]
+                    });
+                    
+                    colorIndex++;
+                }
+            }
+            
+            // Удаляем старые
+            container.querySelectorAll('.bus-marker').forEach(el => el.remove());
+            
+            // Рисуем новые
+            activeBuses.forEach((bus, index) => {
+                const percentage = (bus.distanceCovered / TOTAL_DISTANCE) * 100;
+                
+                const busEl = document.createElement('div');
+                busEl.className = `bus-marker ${bus.color}`;
+                busEl.style.left = Math.min(percentage, 100) + '%';
+                busEl.innerHTML = `
+                    <svg viewBox="0 0 24 24" fill="currentColor" style="width: 70%; height: 70%;">
+                        <path d="M12 2C8 2 4 2.5 4 6V15.5C4 17.43 5.57 19 7.5 19L6 20.5V21H8L10 19H14L16 21H18V20.5L16.5 19C18.43 19 20 17.43 20 15.5V6C20 2.5 16 2 12 2M7.5 17C6.67 17 6 16.33 6 15.5S6.67 14 7.5 14 9 14.67 9 15.5 8.33 17 7.5 17M11 10H6V6H11V10M13 10V6H18V10H13M16.5 17C15.67 17 15 16.33 15 15.5S15.67 14 16.5 14 18 14.67 18 15.5 17.33 17 16.5 17Z"/>
+                    </svg>
+                `;
+                
+                const timeLabel = document.createElement('div');
+                timeLabel.className = 'bus-time-badge';
+                timeLabel.textContent = bus.time;
+                busEl.appendChild(timeLabel);
+                
+                container.appendChild(busEl);
+                
+                // Подсветка остановки
+                if (index === 0) {
+                    let nearestStopIndex = 0;
+                    for (let i = 0; i < STOPS.length; i++) {
+                        if (bus.distanceCovered >= STOPS[i].distanceKm) {
+                            nearestStopIndex = i;
+                        }
+                    }
+                    
+                    container.querySelectorAll('.metro-stop').forEach(stop => stop.classList.remove('active'));
+                    const nearestStop = container.querySelector(`#${container.id}-stop-${nearestStopIndex}`);
+                    if (nearestStop) nearestStop.classList.add('active');
+                }
+            });
+        }
+        
+        // ==========================================
+        // МОДАЛЬНОЕ ОКНО
+        // ==========================================
+        
+        let countdownInterval = null;
+        
+        function showFlightDetails(time, departMinutes, direction) {
+            const now = new Date();
+            const nowMinutes = now.getHours() * 60 + now.getMinutes();
+            const minutesUntil = departMinutes - nowMinutes;
+            const arrivalMinutes = departMinutes + TRIP_DURATION;
+            const arrivalTime = formatTime(arrivalMinutes);
+            
+            const fromStop = direction === 'rybatskoe' ? 'РЫБАЦКОЕ' : 'ЛОБАНОВО';
+            const toStop = direction === 'rybatskoe' ? 'ЛОБАНОВО' : 'РЫБАЦКОЕ';
+            
+            let statusText = '';
+            if (minutesUntil < -5) statusText = 'ОТПРАВЛЕН';
+            else if (minutesUntil < 0) statusText = 'ПОСАДКА';
+            else if (minutesUntil < 2) statusText = '◉ ОТПРАВЛЕНИЕ СЕЙЧАС';
+            else {
+                // Обратный отсчет с секундами будет обновляться
+                statusText = '<span id="countdownTimer"></span>';
+            }
+            
+            const modalContent = document.getElementById('modalContent');
+            modalContent.innerHTML = `
+                <div style="background: linear-gradient(135deg, rgba(255,176,0,0.2) 0%, rgba(0,0,0,0.5) 100%); border: 2px solid var(--amber); border-radius: 12px; padding: 24px; margin-bottom: 20px;">
+                    <div style="text-align: center;">
+                        <div style="font-size: clamp(32px, 10vw, 56px); font-weight: 900; color: var(--amber); text-shadow: 0 0 20px var(--amber-glow); margin-bottom: 12px; font-family: 'Orbitron', monospace;">${time}</div>
+                        <div style="font-size: 16px; font-weight: 700; color: var(--green-crt); text-shadow: 0 0 10px rgba(0,255,65,0.5); text-transform: uppercase; letter-spacing: 2px;">${statusText}</div>
+                    </div>
+                </div>
+                
+                <div style="display: grid; grid-template-columns: 1fr auto 1fr; gap: 10px; align-items: center; margin-bottom: 16px; padding: 14px; background: rgba(255,176,0,0.05); border: 1px solid rgba(255,176,0,0.3); border-radius: 8px;">
+                    <div style="text-align: center; min-width: 0;">
+                        <div style="font-size: 11px; opacity: 0.6; margin-bottom: 6px;">ОТПРАВЛЕНИЕ</div>
+                        <div style="font-size: clamp(14px, 4.5vw, 24px); font-weight: 800; color: var(--amber); word-break: break-word;">${fromStop}</div>
+                        <div style="font-size: clamp(14px, 4vw, 18px); margin-top: 4px; color: var(--green-crt);">${time}</div>
+                    </div>
+                    <div style="font-size: clamp(20px, 6vw, 32px); color: var(--amber);">→</div>
+                    <div style="text-align: center; min-width: 0;">
+                        <div style="font-size: 11px; opacity: 0.6; margin-bottom: 6px;">ПРИБЫТИЕ</div>
+                        <div style="font-size: clamp(14px, 4.5vw, 24px); font-weight: 800; color: var(--amber); word-break: break-word;">${toStop}</div>
+                        <div style="font-size: clamp(14px, 4vw, 18px); margin-top: 4px; color: var(--green-crt);">~${arrivalTime}</div>
+                    </div>
+                </div>
+                
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 16px;">
+                    <div style="text-align: center; padding: 12px; background: rgba(0,0,0,0.5); border: 2px solid rgba(255,176,0,0.3); border-radius: 8px;">
+                        <div style="font-size: 11px; opacity: 0.6; margin-bottom: 6px;">ДЛИТЕЛЬНОСТЬ</div>
+                        <div style="font-size: clamp(22px, 7vw, 32px); font-weight: 800; color: var(--amber);">${TRIP_DURATION}</div>
+                        <div style="font-size: 11px; opacity: 0.6; margin-top: 4px;">МИНУТ</div>
+                    </div>
+                    <div style="text-align: center; padding: 12px; background: rgba(0,0,0,0.5); border: 2px solid rgba(255,176,0,0.3); border-radius: 8px;">
+                        <div style="font-size: 11px; opacity: 0.6; margin-bottom: 6px;">РАССТОЯНИЕ</div>
+                        <div style="font-size: clamp(22px, 7vw, 32px); font-weight: 800; color: var(--amber);">${TOTAL_DISTANCE}</div>
+                        <div style="font-size: 12px; opacity: 0.6; margin-top: 4px;">КИЛОМЕТРОВ</div>
+                    </div>
+                </div>
+                
+                <div style="background: rgba(0,0,0,0.5); border: 2px solid rgba(255,176,0,0.3); border-radius: 8px; padding: 16px; margin-bottom: 20px;">
+                    <div style="font-size: 13px; font-weight: 700; margin-bottom: 12px; color: var(--amber); text-transform: uppercase; letter-spacing: 1px;">ОСТАНОВКИ:</div>
+                    <div style="display: flex; flex-direction: column; gap: 8px;">
+                        ${STOPS.map((stop, index) => {
+                            const estimatedTime = departMinutes + (stop.distanceKm / TOTAL_DISTANCE) * TRIP_DURATION;
+                            const stopTime = formatTime(Math.round(estimatedTime));
+                            return `
+                                <div style="display: flex; align-items: center; justify-content: space-between; padding: 8px; background: rgba(255,176,0,0.05); border-radius: 4px;">
+                                    <div style="display: flex; align-items: center; gap: 8px;">
+                                        <div style="width: 8px; height: 8px; background: var(--amber); border-radius: 50%; box-shadow: 0 0 10px var(--amber-glow);"></div>
+                                        <span style="font-size: 13px; font-weight: 600;">${stop.name}</span>
+                                    </div>
+                                    <span style="font-size: 13px; opacity: 0.7; font-family: 'Orbitron', monospace;">~${stopTime}</span>
+                                </div>
+                            `;
+                        }).join('')}
+                    </div>
+                </div>
+                
+                <button onclick="closeModal()" class="retro-button" style="width: 100%; padding: 16px; font-size: 16px;">ЗАКРЫТЬ</button>
+            `;
+            
+            document.getElementById('flightModal').classList.add('show');
+            
+            // Запускаем обратный отсчет, если нужно
+            if (minutesUntil >= 2) {
+                if (countdownInterval) clearInterval(countdownInterval);
+                updateCountdown(departMinutes);
+                countdownInterval = setInterval(() => updateCountdown(departMinutes), 1000);
+            }
+        }
+        
+        function updateCountdown(departMinutes) {
+            const now = new Date();
+            const nowSeconds = now.getHours() * 3600 + now.getMinutes() * 60 + now.getSeconds();
+            const departSeconds = departMinutes * 60;
+            const secondsUntil = departSeconds - nowSeconds;
+            
+            if (secondsUntil <= 0) {
+                if (countdownInterval) {
+                    clearInterval(countdownInterval);
+                    countdownInterval = null;
+                }
+                return;
+            }
+            
+            const hours = Math.floor(secondsUntil / 3600);
+            const minutes = Math.floor((secondsUntil % 3600) / 60);
+            const seconds = secondsUntil % 60;
+            
+            const timerEl = document.getElementById('countdownTimer');
+            if (timerEl) {
+                timerEl.textContent = `▶ ОТПРАВЛЕНИЕ ЧЕРЕЗ ${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+            }
+        }
+        
+        function closeModal(event) {
+            if (!event || event.target.id === 'flightModal' || event.target.classList.contains('modal-backdrop')) {
+                document.getElementById('flightModal').classList.remove('show');
+                if (countdownInterval) {
+                    clearInterval(countdownInterval);
+                    countdownInterval = null;
+                }
+            }
+        }
+        
+        function formatTime(minutes) {
+            const h = Math.floor(minutes / 60) % 24;
+            const m = minutes % 60;
+            return `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`;
+        }
+        
+        // ==========================================
+        // ПРОБКИ И ТРАФФИК
+        // ==========================================
+        
+        function renderTrafficInfo() {
+            const now = new Date();
+            const currentHour = now.getHours();
+            
+            // Находим текущий уровень загруженности
+            const currentTrafficData = TRAFFIC_DATA.hourly.find(t => parseInt(t.hour) === currentHour) || {level: 5};
+            const trafficLevel = currentTrafficData.level;
+            const multiplier = TRAFFIC_DATA.getMultiplier(trafficLevel);
+            const currentTime = Math.round(TRIP_DURATION * multiplier);
+            
+            // Обновляем индикаторы
+            document.getElementById('trafficLevel').textContent = trafficLevel;
+            document.getElementById('currentTripTime').textContent = currentTime;
+            
+            // Текстовое описание
+            let levelText = '';
+            let levelColor = '';
+            if (trafficLevel <= 2) {
+                levelText = '🟢 Свободно';
+                levelColor = 'var(--green-crt)';
+            } else if (trafficLevel <= 4) {
+                levelText = '🟡 Небольшие задержки';
+                levelColor = '#FFB000';
+            } else if (trafficLevel <= 6) {
+                levelText = '🟠 Средняя загруженность';
+                levelColor = '#FF8800';
+            } else if (trafficLevel <= 8) {
+                levelText = '🔴 Загружено';
+                levelColor = '#FF4444';
+            } else {
+                levelText = '🔴 Сильные пробки';
+                levelColor = 'var(--red-alert)';
+            }
+            
+            document.getElementById('trafficLevelText').textContent = levelText;
+            document.getElementById('trafficLevel').style.color = levelColor;
+            
+            // График по часам
+            const chartContainer = document.getElementById('trafficChart');
+            let chartHtml = '';
+            
+            TRAFFIC_DATA.hourly.forEach(item => {
+                const width = (item.level / 10) * 100;
+                let barColor = '';
+                if (item.level <= 3) barColor = 'bg-green-500';
+                else if (item.level <= 6) barColor = 'bg-yellow-500';
+                else if (item.level <= 8) barColor = 'bg-orange-500';
+                else barColor = 'bg-red-500';
+                
+                const isCurrent = parseInt(item.hour) === currentHour;
+                const highlightClass = isCurrent ? 'border-2 border-amber' : '';
+                
+                chartHtml += `
+                    <div class="flex items-center gap-2 ${highlightClass} p-1 rounded">
+                        <div class="text-xs font-mono w-12">${item.hour}</div>
+                        <div class="flex-1 h-6 bg-gray-800 rounded overflow-hidden">
+                            <div class="${barColor} h-full transition-all duration-500" style="width: ${width}%"></div>
+                        </div>
+                        <div class="text-xs font-bold w-8">${item.level}/10</div>
+                    </div>
+                `;
+            });
+            
+            chartContainer.innerHTML = chartHtml;
+            
+            // Рекомендации
+            let advice = '';
+            const diffTime = currentTime - TRIP_DURATION;
+            if (diffTime > 15) {
+                advice = `Сейчас сильные пробки! Поездка займет <strong>${currentTime} минут</strong> (+${diffTime} мин). Рекомендуем дождаться улучшения ситуации или рассмотреть альтернативные маршруты.`;
+            } else if (diffTime > 5) {
+                advice = `Небольшие задержки на маршруте. Ожидаемое время: <strong>${currentTime} минут</strong> (+${diffTime} мин). Закладывайте дополнительное время.`;
+            } else {
+                advice = `Отличное время для поездки! Дорога свободна, время в пути: <strong>${currentTime} минут</strong>. Выезжайте сейчас!`;
+            }
+            
+            document.getElementById('trafficAdvice').innerHTML = advice;
+        }
+        
+        // ==========================================
+        // АЛЬТЕРНАТИВНЫЕ МАРШРУТЫ
+        // ==========================================
+        
+        function renderAlternatives() {
+            const container = document.getElementById('marshrutkiList');
+            
+            let html = '';
+            MARSHRUTKI.forEach(mk => {
+                html += `
+                    <div class="p-4 bg-black bg-opacity-50 border-2 border-amber rounded-lg hover:border-green-crt transition-all duration-300">
+                        <div class="flex items-start justify-between mb-3 flex-wrap gap-2">
+                            <div class="flex items-center gap-2 sm:gap-3 min-w-0 flex-1">
+                                <div class="text-xl sm:text-3xl font-black glow-text flex-shrink-0" style="font-family: 'Orbitron', monospace;">${mk.number}</div>
+                                <div class="min-w-0">
+                                    <div class="font-bold text-xs sm:text-sm uppercase tracking-wider mb-1 truncate">${mk.route}</div>
+                                    <div class="text-xs opacity-60 truncate">${mk.info}</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="grid grid-cols-3 gap-2 pt-3 border-t border-amber-900 border-opacity-30">
+                            <div class="text-center">
+                                <div class="text-xs opacity-60 mb-1">ВРЕМЯ</div>
+                                <div class="text-sm font-bold text-green-crt">${mk.time}</div>
+                            </div>
+                            <div class="text-center">
+                                <div class="text-xs opacity-60 mb-1">ЦЕНА</div>
+                                <div class="text-sm font-bold text-amber">${mk.price}</div>
+                            </div>
+                            <div class="text-center">
+                                <div class="text-xs opacity-60 mb-1">ЧАСТОТА</div>
+                                <div class="text-sm font-bold">${mk.frequency}</div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+            
+            container.innerHTML = html;
+        }
+        
+        // ==========================================
+        // PUSH-УВЕДОМЛЕНИЯ
+        // ==========================================
+        
+        let notificationPermission = false;
+        
+        function requestNotificationPermission() {
+            if (!('Notification' in window)) {
+                console.log('❌ Уведомления не поддерживаются этим браузером');
+                return;
+            }
+            
+            if (Notification.permission === 'granted') {
+                notificationPermission = true;
+                console.log('✅ Разрешение на уведомления получено');
+            } else if (Notification.permission !== 'denied') {
+                Notification.requestPermission().then(permission => {
+                    if (permission === 'granted') {
+                        notificationPermission = true;
+                        console.log('✅ Разрешение на уведомления предоставлено');
+                        showNotification('🚌 Уведомления включены!', 'Теперь вы будете получать напоминания о рейсах');
+                    }
+                });
+            }
+        }
+        
+        function showNotification(title, body, options = {}) {
+            if (!notificationPermission) return;
+            
+            const defaultOptions = {
+                body: body,
+                icon: 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"%3E%3Crect fill="%23FFB000" width="100" height="100" rx="20"/%3E%3Ctext x="50" y="65" font-size="50" text-anchor="middle" fill="%23000"%3E🚌%3C/text%3E%3C/svg%3E',
+                badge: 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"%3E%3Ctext x="50" y="65" font-size="60" text-anchor="middle"%3E🚌%3C/text%3E%3C/svg%3E',
+                vibrate: [200, 100, 200],
+                tag: 'bus-440',
+                requireInteraction: false,
+                ...options
+            };
+            
+            new Notification(title, defaultOptions);
+        }
+        
+        function scheduleNotification(time, direction) {
+            // Запланировать уведомление за 10 минут
+            const [h, m] = time.split(':').map(Number);
+            const departTime = new Date();
+            departTime.setHours(h, m, 0, 0);
+            
+            const notifyTime = new Date(departTime.getTime() - 10 * 60000);
+            const now = new Date();
+            const delay = notifyTime.getTime() - now.getTime();
+            
+            if (delay > 0 && delay < 24 * 60 * 60 * 1000) {
+                setTimeout(() => {
+                    const directionText = direction === 'rybatskoe' ? 'Рыбацкое → Лобаново' : 'Лобаново → Рыбацкое';
+                    showNotification(
+                        `🚌 Автобус 440 через 10 минут!`,
+                        `Рейс ${time} (${directionText}). Выходите к остановке!`,
+                        { requireInteraction: true }
+                    );
+                }, delay);
+                
+                console.log(`⏰ Уведомление запланировано на ${notifyTime.toLocaleTimeString()} (через ${Math.round(delay/60000)} мин)`);
+            }
+        }
+        
+        // Показать уведомление в панели (не browser notification)
+        function showInAppNotification(message, type = 'info') {
+            const panel = document.getElementById('notificationPanel');
+            const id = 'notif-' + Date.now();
+            
+            let bgColor = 'bg-blue-900';
+            let borderColor = 'border-blue-500';
+            let icon = 'ℹ️';
+            
+            if (type === 'success') {
+                bgColor = 'bg-green-900';
+                borderColor = 'border-green-500';
+                icon = '✅';
+            } else if (type === 'warning') {
+                bgColor = 'bg-yellow-900';
+                borderColor = 'border-yellow-500';
+                icon = '⚠️';
+            } else if (type === 'error') {
+                bgColor = 'bg-red-900';
+                borderColor = 'border-red-500';
+                icon = '❌';
+            }
+            
+            const notifHtml = `
+                <div id="${id}" class="${bgColor} ${borderColor} border-2 rounded-lg p-4 mb-3 shadow-lg animate-slideIn" style="animation: slideIn 0.3s ease-out;">
+                    <div class="flex items-start gap-3">
+                        <div class="text-2xl">${icon}</div>
+                        <div class="flex-1">
+                            <p class="text-sm font-medium">${message}</p>
+                        </div>
+                        <button onclick="document.getElementById('${id}').remove()" class="text-xl opacity-60 hover:opacity-100">✕</button>
+                    </div>
+                </div>
+            `;
+            
+            panel.insertAdjacentHTML('beforeend', notifHtml);
+            
+            setTimeout(() => {
+                const el = document.getElementById(id);
+                if (el) el.remove();
+            }, 5000);
+        }
+        
+        // ==========================================
+        // AI-ПОМОЩНИК
+        // ==========================================
+        
+        let aiChatOpen = false;
+        let conversationHistory = [];
+        const AI_SERVER_URL = 'http://localhost:5000/chat';
+        let useGigaChat = true; // Переключатель GigaChat/локальный бот
+        
+        function toggleAiChat() {
+            aiChatOpen = !aiChatOpen;
+            const chatWindow = document.getElementById('aiChatWindow');
+            const chatButton = document.getElementById('aiChatButton');
+            
+            if (aiChatOpen) {
+                chatWindow.style.display = 'flex';
+                chatButton.style.transform = 'scale(0.9)';
+                
+                // Приветствие при первом открытии
+                const messages = document.getElementById('aiChatMessages');
+                if (messages.children.length === 0) {
+                    addAiMessage('ai', getGreeting());
+                }
+                
+                // Фокус на input
+                setTimeout(() => document.getElementById('aiChatInput').focus(), 100);
+            } else {
+                chatWindow.style.display = 'none';
+                chatButton.style.transform = 'scale(1)';
+            }
+        }
+        
+        function getGreeting() {
+            const hour = new Date().getHours();
+            const day = new Date().getDay();
+            let greeting = '';
+            
+            // Время суток
+            if (hour >= 5 && hour < 12) {
+                greeting = '☀️ Доброе утро!';
+            } else if (hour >= 12 && hour < 18) {
+                greeting = '🌤️ Добрый день!';
+            } else if (hour >= 18 && hour < 23) {
+                greeting = '🌙 Добрый вечер!';
+            } else {
+                greeting = '🌃 Доброй ночи!';
+            }
+            
+            // Умные подсказки
+            let hint = '';
+            
+            // Пробки
+            const trafficData = TRAFFIC_DATA.hourly.find(t => parseInt(t.hour) === hour);
+            if (trafficData && trafficData.level >= 8) {
+                hint += ` ⚠️ Сейчас пробки ${trafficData.level}/10!`;
+            }
+            
+            // Рабочие дни
+            if (day >= 1 && day <= 5) {
+                if (hour >= 7 && hour <= 9) {
+                    hint += ' Утренний час пик.';
+                } else if (hour >= 17 && hour <= 19) {
+                    hint += ' Вечерний час пик.';
+                }
+            }
+            
+            let intro = '\n\nЯ — ваш AI-помощник по транспорту. Задайте любой вопрос о маршруте 440!';
+            
+            if (!useGigaChat) {
+                intro += '\n\n<small>💡 Для расширенных возможностей запустите: <code>start_ai_server.bat</code></small>';
+            }
+            
+            return greeting + hint + intro;
+        }
+        
+        function addAiMessage(sender, text) {
+            const messages = document.getElementById('aiChatMessages');
+            const time = new Date().toLocaleTimeString('ru-RU', {hour: '2-digit', minute: '2-digit'});
+            
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `mb-3 ${sender === 'user' ? 'text-right' : ''}`;
+            
+            if (sender === 'ai') {
+                messageDiv.innerHTML = `
+                    <div class="inline-block bg-amber bg-opacity-20 border border-amber rounded-lg px-3 py-2 text-sm text-left max-w-[85%]">
+                        <div class="whitespace-pre-line">${text}</div>
+                        <div class="text-xs opacity-50 mt-1">${time}</div>
+                    </div>
+                `;
+            } else {
+                messageDiv.innerHTML = `
+                    <div class="inline-block bg-green-crt bg-opacity-20 border border-green-crt rounded-lg px-3 py-2 text-sm max-w-[85%]">
+                        <div>${text}</div>
+                        <div class="text-xs opacity-50 mt-1">${time}</div>
+                    </div>
+                `;
+            }
+            
+            messages.appendChild(messageDiv);
+            messages.scrollTop = messages.scrollHeight;
+        }
+        
+        async function sendAiMessage() {
+            const input = document.getElementById('aiChatInput');
+            const text = input.value.trim();
+            
+            if (!text) return;
+            
+            // Добавляем сообщение пользователя
+            addAiMessage('user', text);
+            input.value = '';
+            
+            // Показываем индикатор печатания
+            const typingId = 'typing-' + Date.now();
+            const messages = document.getElementById('aiChatMessages');
+            const typingDiv = document.createElement('div');
+            typingDiv.id = typingId;
+            typingDiv.className = 'mb-3';
+            typingDiv.innerHTML = `
+                <div class="inline-block bg-amber bg-opacity-20 border border-amber rounded-lg px-3 py-2 text-sm">
+                    <span class="opacity-60">Печатает...</span>
+                </div>
+            `;
+            messages.appendChild(typingDiv);
+            messages.scrollTop = messages.scrollHeight;
+            
+            // Пробуем GigaChat сервер
+            if (useGigaChat) {
+                try {
+                    const response = await fetch(AI_SERVER_URL, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            message: text,
+                            history: conversationHistory
+                        })
+                    });
+                    
+                    // Убираем индикатор печатания
+                    document.getElementById(typingId)?.remove();
+                    
+                    if (response.ok) {
+                        const data = await response.json();
+                        
+                        // Добавляем в историю
+                        conversationHistory.push({role: 'user', content: text});
+                        conversationHistory.push({role: 'assistant', content: data.response});
+                        
+                        // Ограничиваем историю (последние 10 сообщений)
+                        if (conversationHistory.length > 20) {
+                            conversationHistory = conversationHistory.slice(-20);
+                        }
+                        
+                        addAiMessage('ai', data.response);
+                        return;
+                    } else {
+                        console.warn('GigaChat сервер недоступен, используем локальный бот');
+                        useGigaChat = false;
+                    }
+                } catch (error) {
+                    console.error('Ошибка подключения к GigaChat:', error);
+                    document.getElementById(typingId)?.remove();
+                    
+                    // Показываем предупреждение только при первой ошибке
+                    if (useGigaChat) {
+                        addAiMessage('ai', '⚠️ GigaChat сервер не запущен. Работаю в базовом режиме.\n\nДля включения GigaChat запустите: start_ai_server.bat');
+                        useGigaChat = false;
+                    }
+                }
+            }
+            
+            // Fallback: локальный бот
+            setTimeout(() => {
+                const response = processAiCommand(text.toLowerCase());
+                addAiMessage('ai', response);
+            }, 300);
+        }
+        
+        function sendQuickCommand(cmd) {
+            document.getElementById('aiChatInput').value = cmd;
+            sendAiMessage();
+        }
+        
+        function processAiCommand(text) {
+            const now = new Date();
+            const currentHour = now.getHours();
+            const currentMin = now.getMinutes();
+            const currentTime = currentHour * 60 + currentMin;
+            
+            // Команда: следующий автобус
+            if (text.includes('следующ') || text.includes('когда') || text.includes('автобус')) {
+                const direction = text.includes('лобаново') ? 'lobanovo' : 'rybatskoe';
+                const schedule = direction === 'rybatskoe' ? SCHEDULE_FULL.rybatskoe : SCHEDULE_FULL.lobanovo;
+                
+                const upcoming = schedule
+                    .map(t => {
+                        const [h, m] = t.split(':').map(Number);
+                        return {time: t, minutes: h * 60 + m};
+                    })
+                    .filter(s => s.minutes > currentTime)
+                    .slice(0, 3);
+                
+                if (upcoming.length === 0) {
+                    return '😔 Сегодня автобусов больше нет. Первый завтра в ' + schedule[0];
+                }
+                
+                let response = `🚌 Ближайшие рейсы ${direction === 'rybatskoe' ? '→ РЫБАЦКОЕ' : '← ЛОБАНОВО'}:\n\n`;
+                upcoming.forEach((bus, i) => {
+                    const diff = bus.minutes - currentTime;
+                    response += `${i === 0 ? '▶' : '○'} ${bus.time} — через ${diff} мин\n`;
+                });
+                
+                return response;
+            }
+            
+            // Команда: успею ли
+            if (text.includes('успе')) {
+                const timeMatch = text.match(/(\d{1,2})[:\.]?(\d{2})/);
+                if (timeMatch) {
+                    const targetHour = parseInt(timeMatch[1]);
+                    const targetMin = parseInt(timeMatch[2]);
+                    const targetTime = targetHour * 60 + targetMin;
+                    const diff = targetTime - currentTime;
+                    
+                    if (diff <= 0) {
+                        return `❌ Рейс ${timeMatch[0]} уже ушел.`;
+                    } else if (diff < 5) {
+                        return `⚠️ Осталось всего ${diff} минут! Бегите!`;
+                    } else if (diff < 10) {
+                        return `✅ Успеете, но выходите СЕЙЧАС! ${diff} минут до рейса.`;
+                    } else {
+                        return `✅ Да, успеете! У вас ${diff} минут. Можете выходить через ${diff - 8} минут (с запасом 8 мин на дорогу).`;
+                    }
+                }
+                return '🤔 Укажите время рейса, например: "Успею на 18:10?"';
+            }
+            
+            // Команда: пробки
+            if (text.includes('пробк') || text.includes('загруж') || text.includes('траф')) {
+                const trafficData = TRAFFIC_DATA.hourly.find(t => parseInt(t.hour) === currentHour) || {level: 5};
+                const level = trafficData.level;
+                const multiplier = TRAFFIC_DATA.getMultiplier(level);
+                const adjustedTime = Math.round(TRIP_DURATION * multiplier);
+                const delay = adjustedTime - TRIP_DURATION;
+                
+                let status = '';
+                if (level <= 2) status = '🟢 СВОБОДНО';
+                else if (level <= 4) status = '🟡 НЕБОЛЬШИЕ ЗАДЕРЖКИ';
+                else if (level <= 6) status = '🟠 СРЕДНЯЯ ЗАГРУЖЕННОСТЬ';
+                else if (level <= 8) status = '🔴 ЗАГРУЖЕНО';
+                else status = '🚨 ПРОБКИ';
+                
+                let response = `🚦 ПРОБКИ СЕЙЧАС\n\n${status} (${level}/10)\n\n`;
+                response += `⏱️ Обычно: ${TRIP_DURATION} мин\n`;
+                response += `⏱️ Сейчас: ~${adjustedTime} мин`;
+                
+                if (delay > 0) {
+                    response += `\n\n⚠️ Задержка: +${delay} мин`;
+                }
+                
+                // Рекомендация
+                if (level >= 8) {
+                    response += '\n\n💡 Рекомендую подождать 1-2 часа или взять маршрутку К-440А.';
+                }
+                
+                return response;
+            }
+            
+            // Команда: погода
+            if (text.includes('погод') || text.includes('температ') || text.includes('дожд')) {
+                if (weatherData.start && weatherData.end && weatherData.start.temperature_2m !== undefined) {
+                    const tempStart = Math.round(weatherData.start.temperature_2m);
+                    const tempEnd = Math.round(weatherData.end.temperature_2m);
+                    const descStart = getWeatherDesc(weatherData.start.weather_code);
+                    const descEnd = getWeatherDesc(weatherData.end.weather_code);
+                    const iconStart = getWeatherIcon(weatherData.start.weather_code);
+                    const iconEnd = getWeatherIcon(weatherData.end.weather_code);
+                    
+                    let response = '🌤️ ПОГОДА\n\n';
+                    response += `${iconStart} Рыбацкое: ${tempStart}°, ${descStart}\n`;
+                    response += `${iconEnd} Павлово-2: ${tempEnd}°, ${descEnd}`;
+                    return response;
+                } else {
+                    return '⏳ Загружаю данные о погоде... Попробуйте через пару секунд.';
+                }
+            }
+            
+            // Команда: маршрутки
+            if (text.includes('маршрут') || text.includes('альтернатив') || text.includes('другие')) {
+                let response = '🚐 МАРШРУТКИ\n\n';
+                MARSHRUTKI.forEach(m => {
+                    response += `${m.number}: ${m.route}\n`;
+                    response += `⏱️ ${m.time} | 💰 ${m.price}\n\n`;
+                });
+                return response;
+            }
+            
+            // Команда: расстояние/остановки
+            if (text.includes('расстоян') || text.includes('остановк') || text.includes('сколько')) {
+                let response = '📍 ОСТАНОВКИ (${TOTAL_DISTANCE} км):\n\n';
+                STOPS.forEach((stop, i) => {
+                    response += `${i + 1}. ${stop.name} — ${stop.distanceKm} км\n`;
+                });
+                return response;
+            }
+            
+            // Команда: цена
+            if (text.includes('цен') || text.includes('стоим') || text.includes('билет')) {
+                return '💰 СТОИМОСТЬ\n\n🚌 Автобус 440: ~60₽\n🚐 Маршрутки: 55-70₽\n🚇 Метро: 70₽\n🚕 Такси: ~400-500₽';
+            }
+            
+            // Команда: помощь
+            if (text.includes('помо') || text.includes('команд') || text === '?') {
+                return `📋 ЧТО Я УМЕЮ:\n\n• "Когда следующий?" — расписание\n• "Успею на 18:10?" — расчет времени\n• "Пробки" — загруженность сейчас\n• "Погода" — температура\n• "Маршрутки" — альтернативы\n• "Остановки" — список остановок\n• "Цена" — стоимость проезда\n\nПросто задавайте вопросы! 😊`;
+            }
+            
+            // Неизвестная команда
+            return `🤔 Не совсем понял. Попробуйте:\n\n• "Когда следующий автобус?"\n• "Успею на 18:10?"\n• "Какие пробки?"\n• "Погода"\n\nИли напишите "помощь" для списка команд.`;
+        }
+        
+        // ==========================================
+        // ЗАПУСК
+        // ==========================================
+        
+        window.addEventListener('DOMContentLoaded', init);
+    </script>
+</body>
+</html>
