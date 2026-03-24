@@ -97,8 +97,8 @@
         
         .flip-digit {
             position: relative;
-            width: 45px;
-            height: 70px;
+            width: 32px;
+            height: 50px;
             background: linear-gradient(180deg, #1a1a1a 0%, #0a0a0a 50%, #000000 100%);
             border: 2px solid var(--amber);
             border-radius: 6px;
@@ -126,7 +126,7 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 40px;
+            font-size: 28px;
             font-weight: 800;
             color: var(--amber);
             text-shadow: 0 0 10px var(--amber-glow);
@@ -150,7 +150,7 @@
         .flip-separator {
             display: flex;
             align-items: center;
-            font-size: 50px;
+            font-size: 32px;
             font-weight: 800;
             color: var(--amber);
             text-shadow: 0 0 20px var(--amber-glow);
@@ -449,7 +449,7 @@
         /* Metro Line */
         .metro-container {
             position: relative;
-            padding: 80px 20px;
+            padding: 40px 20px 60px 20px;
         }
         
         .metro-line {
@@ -517,15 +517,23 @@
         
         .metro-stop-label {
             position: absolute;
-            top: 35px;
+            top: 30px;
             left: 50%;
             transform: translateX(-50%);
-            font-size: 11px;
+            font-size: 9px;
             font-weight: 600;
             white-space: nowrap;
             color: #666;
             text-transform: uppercase;
-            letter-spacing: 1px;
+            letter-spacing: 0;
+            max-width: 55px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        
+        /* Stagger labels to avoid overlap */
+        .metro-stop:nth-child(even) .metro-stop-label {
+            top: -25px;
         }
         
         .metro-stop.active .metro-stop-label {
@@ -737,83 +745,83 @@
         /* Mobile Responsive */
         @media (max-width: 640px) {
             .flip-digit {
-                width: 30px;
-                height: 48px;
+                width: 26px;
+                height: 40px;
             }
             
             .flip-number {
-                font-size: 24px;
+                font-size: 20px;
             }
             
             .flip-separator {
-                font-size: 36px;
+                font-size: 26px;
             }
             
             .flight-board-header {
-                grid-template-columns: 70px 1fr 75px auto !important;
+                grid-template-columns: 55px 1fr 55px 70px !important;
                 gap: 4px !important;
-                padding: 8px 10px !important;
-                font-size: 9px !important;
+                padding: 8px 6px !important;
+                font-size: 8px !important;
             }
             
             .flight-row {
-                grid-template-columns: 70px 1fr 75px auto;
+                grid-template-columns: 55px 1fr 55px 70px;
                 gap: 4px;
-                padding: 10px 8px;
+                padding: 8px 6px;
             }
             
             .flight-time {
-                font-size: 18px;
-                letter-spacing: 0;
+                font-size: 16px;
+                letter-spacing: -0.5px;
             }
             
             .flight-route {
-                font-size: 9px;
-                gap: 3px;
+                font-size: 8px;
+                gap: 2px;
             }
             
             .flight-route span {
                 overflow: hidden;
                 text-overflow: ellipsis;
-                max-width: 60px;
+                max-width: 50px;
+                white-space: nowrap;
             }
             
             .status-label {
-                font-size: 10px;
-                padding: 4px 6px;
-                letter-spacing: 0;
+                font-size: 9px;
+                padding: 3px 4px;
+                letter-spacing: -0.5px;
                 white-space: nowrap;
             }
             
             .metro-stop {
-                width: 16px;
-                height: 16px;
+                width: 14px;
+                height: 14px;
                 border-width: 3px;
             }
             
             .metro-stop-label {
-                font-size: 8px;
+                font-size: 7px;
                 letter-spacing: 0;
-                max-width: 60px;
-                white-space: normal;
-                text-align: center;
-                line-height: 1.2;
+                max-width: 42px;
+                overflow: hidden;
+                text-overflow: ellipsis;
             }
             
             .metro-container {
-                padding: 60px 10px;
+                padding: 50px 8px;
             }
             
             .bus-marker {
-                width: 34px;
-                height: 34px;
-                border-width: 3px;
+                width: 30px;
+                height: 30px;
+                border-width: 2px;
             }
             
             .bus-time-badge {
-                font-size: 10px;
-                padding: 2px 6px;
-                top: -32px;
+                font-size: 9px;
+                padding: 2px 4px;
+                top: -28px;
             }
             
             .retro-panel {
@@ -822,56 +830,68 @@
             }
             
             .weather-widget {
-                padding: 10px;
+                padding: 8px;
             }
             
             .weather-widget .text-2xl {
-                font-size: 1.1rem;
+                font-size: 1rem;
             }
             
             .modal-content {
                 max-height: 92vh;
-                padding: 16px;
+                padding: 14px;
                 border-width: 2px;
                 border-radius: 12px;
-                margin: 8px;
+                margin: 6px;
+            }
+            
+            .header-title {
+                font-size: 1.15rem !important;
+            }
+            
+            .header-subtitle {
+                font-size: 0.6rem !important;
             }
         }
         
         /* Extra small phones (iPhone SE, Galaxy A series folded) */
         @media (max-width: 380px) {
             .flip-digit {
-                width: 26px;
-                height: 42px;
+                width: 22px;
+                height: 36px;
             }
             
             .flip-number {
-                font-size: 20px;
+                font-size: 17px;
             }
             
             .flip-separator {
-                font-size: 30px;
+                font-size: 22px;
             }
             
             .flight-board-header {
-                grid-template-columns: 60px 1fr 60px auto !important;
+                grid-template-columns: 50px 1fr 50px 60px !important;
             }
             
             .flight-row {
-                grid-template-columns: 60px 1fr 60px auto;
+                grid-template-columns: 50px 1fr 50px 60px;
             }
             
             .flight-time {
-                font-size: 16px;
+                font-size: 14px;
             }
             
             .flight-route {
-                font-size: 8px;
+                font-size: 7px;
             }
             
             .status-label {
-                font-size: 9px;
-                padding: 3px 5px;
+                font-size: 8px;
+                padding: 2px 3px;
+            }
+            
+            .header-title {
+                font-size: 1rem !important;
             }
         }
         
@@ -978,34 +998,34 @@
         
         <!-- Заголовок -->
         <div class="sticky top-0 z-40 retro-panel border-x-0 border-t-0 rounded-none">
-            <div class="max-w-7xl mx-auto px-4 py-6">
-                <div class="flex items-center justify-between gap-4 flex-wrap">
-                    <div class="flex-1 min-w-0">
-                        <h1 class="text-2xl md:text-4xl font-black glow-text uppercase tracking-wider mb-2">
+            <div class="max-w-7xl mx-auto px-3 sm:px-4 py-3 sm:py-4">
+                <div class="flex items-center justify-between gap-2">
+                    <div class="min-w-0 flex-shrink-1">
+                        <h1 class="header-title text-lg sm:text-2xl md:text-4xl font-black glow-text uppercase tracking-wide mb-1 truncate">
                             🚌 МАРШРУТ 440
                         </h1>
-                        <p class="text-xs md:text-sm opacity-70 uppercase tracking-widest" style="color: var(--green-crt);">
+                        <p class="header-subtitle text-[10px] sm:text-xs md:text-sm opacity-70 uppercase tracking-wider truncate" style="color: var(--green-crt);">
                             ✦ УДАЧНОЙ ДОРОГИ ДОМОЙ ✦
                         </p>
                     </div>
                     
                     <!-- Split-Flap Clock -->
-                    <div class="flex flex-col items-end gap-2">
+                    <div class="flex flex-col items-end gap-1 flex-shrink-0">
                         <div class="flip-clock" id="flipClock"></div>
-                        <div id="currentDate" class="text-xs uppercase tracking-wider opacity-70"></div>
+                        <div id="currentDate" class="text-[10px] sm:text-xs uppercase tracking-wider opacity-70 whitespace-nowrap"></div>
                     </div>
                 </div>
             </div>
         </div>
         
         <!-- Погода -->
-        <div class="max-w-7xl mx-auto px-4 py-4">
-            <div class="grid grid-cols-2 gap-4">
+        <div class="max-w-7xl mx-auto px-2 sm:px-4 py-2 sm:py-4">
+            <div class="grid grid-cols-2 gap-2 sm:gap-4">
                 <div class="weather-widget">
-                    <div class="flex items-center gap-3">
-                        <div id="weatherIconStart" style="font-size: 32px;">⏳</div>
+                    <div class="flex items-center gap-2 sm:gap-3">
+                        <div id="weatherIconStart" style="font-size: 24px;">⏳</div>
                         <div class="flex-1 min-w-0">
-                            <div class="text-xs opacity-60 uppercase tracking-wider">РЫБАЦКОЕ</div>
+                            <div class="text-[10px] sm:text-xs opacity-60 uppercase tracking-wider">РЫБАЦКОЕ</div>
                             <div id="weatherTempStart" class="text-2xl font-black glow-text">--°</div>
                             <div id="weatherDescStart" class="text-xs opacity-50 truncate"></div>
                         </div>
@@ -1013,10 +1033,10 @@
                 </div>
                 
                 <div class="weather-widget">
-                    <div class="flex items-center gap-3">
-                        <div id="weatherIconEnd" style="font-size: 32px;">⏳</div>
+                    <div class="flex items-center gap-2 sm:gap-3">
+                        <div id="weatherIconEnd" style="font-size: 24px;">⏳</div>
                         <div class="flex-1 min-w-0">
-                            <div class="text-xs opacity-60 uppercase tracking-wider">ПАВЛОВО-2</div>
+                            <div class="text-[10px] sm:text-xs opacity-60 uppercase tracking-wider">ПАВЛОВО-2</div>
                             <div id="weatherTempEnd" class="text-2xl font-black glow-text">--°</div>
                             <div id="weatherDescEnd" class="text-xs opacity-50 truncate"></div>
                         </div>
@@ -1026,30 +1046,32 @@
         </div>
         
         <!-- Табы -->
-        <div class="max-w-7xl mx-auto px-4 py-4">
-            <div class="retro-panel p-3">
-                <div class="flex flex-wrap justify-center gap-2 sm:grid sm:grid-cols-3 lg:grid-cols-5 sm:gap-3">
-                    <button onclick="switchTab('rybatskoe')" id="tab-rybatskoe" class="retro-button text-xs sm:text-sm flex-1 min-w-[calc(50%-0.25rem)] sm:min-w-0">
-                        → РЫБАЦКОЕ
+        <div class="max-w-7xl mx-auto px-2 sm:px-4 py-2 sm:py-4">
+            <div class="retro-panel p-2 sm:p-3">
+                <div class="grid grid-cols-5 gap-1 sm:gap-2">
+                    <button onclick="switchTab('rybatskoe')" id="tab-rybatskoe" class="retro-button text-[9px] sm:text-xs md:text-sm px-1 sm:px-3 py-2">
+                        →РЫБ
+                        <span class="hidden sm:inline">АЦКОЕ</span>
                     </button>
-                    <button onclick="switchTab('lobanovo')" id="tab-lobanovo" class="retro-button text-xs sm:text-sm flex-1 min-w-[calc(50%-0.25rem)] sm:min-w-0">
-                        ← ЛОБАНОВО
+                    <button onclick="switchTab('lobanovo')" id="tab-lobanovo" class="retro-button text-[9px] sm:text-xs md:text-sm px-1 sm:px-3 py-2">
+                        ←ЛОБ
+                        <span class="hidden sm:inline">АНОВО</span>
                     </button>
-                    <button onclick="switchTab('map')" id="tab-map" class="retro-button text-xs sm:text-sm flex-1 min-w-[calc(33%-0.25rem)] sm:min-w-0">
-                        ◉ ТРАССА
+                    <button onclick="switchTab('map')" id="tab-map" class="retro-button text-[9px] sm:text-xs md:text-sm px-1 sm:px-3 py-2">
+                        ◉ <span class="hidden sm:inline">ТРАССА</span><span class="sm:hidden">КАРТА</span>
                     </button>
-                    <button onclick="switchTab('traffic')" id="tab-traffic" class="retro-button text-xs sm:text-sm flex-1 min-w-[calc(33%-0.25rem)] sm:min-w-0">
-                        🚦 ПРОБКИ
+                    <button onclick="switchTab('traffic')" id="tab-traffic" class="retro-button text-[9px] sm:text-xs md:text-sm px-1 sm:px-3 py-2">
+                        🚦 <span class="hidden sm:inline">ПРОБКИ</span><span class="sm:hidden">ПРОБ</span>
                     </button>
-                    <button onclick="switchTab('alternatives')" id="tab-alternatives" class="retro-button text-xs sm:text-sm flex-1 min-w-[calc(33%-0.25rem)] sm:min-w-0">
-                        🔄 ДРУГИЕ
+                    <button onclick="switchTab('alternatives')" id="tab-alternatives" class="retro-button text-[9px] sm:text-xs md:text-sm px-1 sm:px-3 py-2">
+                        🔄 <span class="hidden sm:inline">ДРУГИЕ</span><span class="sm:hidden">ДР</span>
                     </button>
                 </div>
             </div>
         </div>
         
         <!-- Контент вкладок -->
-        <div class="max-w-7xl mx-auto px-4">
+        <div class="max-w-7xl mx-auto px-2 sm:px-4">
             
             <!-- Вкладка Рыбацкое -->
             <div id="content-rybatskoe" class="tab-content hidden">
@@ -1551,7 +1573,7 @@
             }
             
             let html = `
-                <div class="flight-board-header" style="display: grid; grid-template-columns: 90px 1fr 100px 120px; gap: 8px; padding: 10px 12px; margin: 4px; border-bottom: 2px solid rgba(255,176,0,0.3); font-size: 10px; font-weight: 700; color: var(--amber); text-transform: uppercase; letter-spacing: 1px;">
+                <div class="flight-board-header" style="display: grid; grid-template-columns: 90px 1fr 100px 120px; gap: 8px; padding: 8px 10px; margin: 4px; border-bottom: 2px solid rgba(255,176,0,0.3); font-size: 9px; font-weight: 700; color: var(--amber); text-transform: uppercase; letter-spacing: 0.5px;">
                     <div>ВРЕМЯ</div>
                     <div>МАРШРУТ</div>
                     <div>ПУТЬ</div>
